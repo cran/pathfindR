@@ -1,0 +1,41 @@
+.onAttach <- function(libname, pkgname) {
+  packageStartupMessage(
+"##############################################################################
+                        Welcome to pathfindR
+##############################################################################")
+}
+
+#' pathfindR: A package for Pathway Enrichment Analysis Utilizing Active
+#' Subnetworks
+#'
+#' The pathfindR package provides two important functions: \code{run_pathfindR} and
+#' \code{choose_clusters}.
+#'
+#' @section run_pathfindR: This function is the wrapper function for the pathfindR
+#'   workflow. It takes in a data frame consisting of Gene Symbol,
+#'   log-fold-change and adjusted-p values. After input testing, any gene
+#'   symbols that are not in the PIN are converted to alias symbols if the alias
+#'   is in the PIN. Next, active subnetwork search is performed. Pathway
+#'   enrichment analysis is performed using the genes in each of the active
+#'   subnetworks. Pathways with adjusted-p values lower than
+#'   \code{enrichment_threshold} are discarded. The lowest adjusted-p value
+#'   (over all subnetworks) for each pathway is kept. This process of active
+#'   subnetwork search and enrichment is repeated  for a selected number of
+#'   \code{iterations}, which is executed in parallel. Over all iterations, the
+#'   lowest and the highest adjusted-p values, as well as number of occurrences
+#'   are reported for each enriched pathway.
+#'
+#' @section choose_clusters: This function first calculates the pairwise
+#'   distances between the pathways in the \code{result_df} data frame. Via a
+#'   shiny HTML document, the hierarchical clustering dendrogram is visualized.
+#'   In this HTML document, the user can select the value at which to cut the
+#'   tree and the resulting representative pathways (chosen by smallest lowest p
+#'   value) are presented as a table and pathways with cluster assignments can be
+#'   saved as a csv file.
+#'
+#' @seealso See \code{\link{run_pathfindR}} and \code{\link{choose_clusters}}
+#'   for more details.
+#'
+#' @docType package
+#' @name pathfindR
+NULL
