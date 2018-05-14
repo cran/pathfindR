@@ -10,7 +10,8 @@ run_pathfindR(input, p_val_threshold = 0.05, enrichment_threshold = 0.05,
   saIter = 10000, gaPop = 400, gaIter = 10000, gaThread = 5,
   gaMut = 0, grMaxDepth = 1, grSearchDepth = 1, grOverlap = 0.5,
   grSubNum = 1000, iterations = 10, n_processes = NULL,
-  pin_name_path = "Biogrid", score_thr = 3, sig_gene_thr = 2)
+  pin_name_path = "Biogrid", score_thr = 3, sig_gene_thr = 2,
+  gene_sets = "KEGG")
 }
 \arguments{
 \item{input}{the input data that pathfindR uses. The input must be a data
@@ -78,6 +79,9 @@ to "Biogrid".}
 \item{score_thr}{active subnetwork score threshold (Default = 3)}
 
 \item{sig_gene_thr}{threshold for minimum number of significant genes (Default = 2)}
+
+\item{gene_sets}{the gene sets to be used for enrichment analysis. Available gene sets
+are KEGG, Reactome, BioCarta, GO-BP, GO-CC and GO-MF(Default = "KEGG")}
 }
 \value{
 Data frame of pathview enrichment results. Columns are: \describe{
@@ -92,7 +96,7 @@ Data frame of pathview enrichment results. Columns are: \describe{
  The function also creates an HTML report with the pathfindR enrichment
  results linked to the visualizations of the pathways in addition to
  the table of converted gene symbols. This report can be found in
- "pathfindr_Results/results.html" under the current working directory.
+ "pathfindR_Results/results.html" under the current working directory.
 }
 \description{
 \code{run_pathfindR} is the wrapper function for the pathfindR workflow

@@ -20,7 +20,7 @@
 #'   workflow.
 #' @examples
 #' pin_path <- return_pin_path("KEGG")
-#' enrichment(genes_by_pathway, c("PER1", "PER2", "CRY1", "CREB1"), pathways_list,
+#' enrichment(kegg_genes, c("PER1", "PER2", "CRY1", "CREB1"), kegg_pathways,
 #'            "bonferroni", 0.05, pin_path)
 enrichment <- function(genes_by_pathway, genes_of_interest,
                        pathways_list, adj_method = "bonferroni",
@@ -60,10 +60,8 @@ enrichment <- function(genes_by_pathway, genes_of_interest,
     enrichment_res$ID <- rownames(enrichment_res)
 
     ## Pathway descriptions
-    idx <- match(paste0("path:", enrichment_res$ID), names(pathways_list))
+    idx <- match(enrichment_res$ID, names(pathways_list))
     enrichment_res$Pathway <- pathways_list[idx]
-    enrichment_res$Pathway <- sub(" - Homo sapiens \\(human\\)", "",
-                                  enrichment_res$Pathway)
 
     ## reorder columns
     remaining <- setdiff(colnames(enrichment_res), c("ID", "Pathway"))

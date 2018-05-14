@@ -18,13 +18,13 @@ knitr::opts_chunk$set(
 
 `pathfindR` is an R package for pathway enrichment analysis of gene-level differential expression/methylation data utilizing active subnetworks. The package also enables hierarchical clustering of the enriched pathways. The method is described in detail in Ulgen E, Ozisik O, Sezerman OU. 2018. pathfindR: An R Package for Pathway Enrichment Analysis Utilizing Active Subnetworks. bioRxiv. [https://doi.org/10.1101/272450](https://doi.org/10.1101/272450)
 
-Our motivation to develop this package was that direct pathway enrichment analysis of differential rna/protein expression or dna methylation results may not provide the researcher with the full picture. That is to say; pathway enrichment of only the list of significant genes may not be informative enough to explain the underlying disease mechanisms. 
+Our motivation to develop this package was that direct pathway enrichment analysis of differential RNA/protein expression or DNA methylation results may not provide the researcher with the full picture. That is to say; pathway enrichment of only the list of significant genes may not be informative enough to explain the underlying disease mechanisms. 
 
 An active subnetwork is defined as a group of interconnected genes in a protein-protein interaction network (PIN) that contains most of the significant genes. Therefore, these active subnetworks define distinct disease-associated sets of genes, whether discovered through differential expression analysis or discovered because of being in interaction with a significant gene.
 
-Therefore, we propose to leverage information from a PIN to identify distinct active subnetworks and then perform pathway enrichment analyses on these subnetworks. Briefly, this workflow first maps the significant genes onto a PIN and finds active subnetworks. Next, pathway enrichment analyses are performed using each gene set of the identified active subnetworks. Finally, these enrichment results are summarized and returned as a data frame. This workflow is implemented as the function `run_pathfindR()` and further described in the "Enrichment Worklow" section of this vignette.
+Therefore, we propose to leverage information from a PIN to identify distinct active subnetworks and then perform pathway enrichment analyses on these subnetworks. Briefly, this workflow first maps the significant genes onto a PIN and finds active subnetworks. Next, pathway enrichment analyses are performed using each gene set of the identified active subnetworks. Finally, these enrichment results are summarized and returned as a data frame. This workflow is implemented as the function `run_pathfindR()` and further described in the "Enrichment Workflow" section of this vignette.
 
-This process usually yields a great number of enriched pathways with related biological functions. We therefore implemented a pairwise distance metric (as proposed by Chen et al. [1]) between pathways and based on this distance metric, also implemented hierarchical clustering of the pathways through a shiny app, allowing dynamic partioning of the dendrogram into relevant clusters. Details of clustering and partioning of pathways are presented in the "Pathway Clustering" section of this vignette.
+This process usually yields a great number of enriched pathways with related biological functions. We therefore implemented a pairwise distance metric (as proposed by Chen et al. [1]) between pathways and based on this distance metric, also implemented hierarchical clustering of the pathways through a shiny app, allowing dynamic partitioning of the dendrogram into relevant clusters. Details of clustering and partitioning of pathways are presented in the "Pathway Clustering" section of this vignette.
 
 # Enrichment Workflow
 
@@ -51,6 +51,11 @@ The user may want to change certain arguments of the function:
 result <- run_pathfindR(RA_input, pin_name = "IntAct")
 # to use an external PIN of user's choice
 result <- run_pathfindR(RA_input, pin_name = "/path/to/myPIN.sif")
+
+# available gene sets are KEGG, Reactome, BioCarta, GO-BP, GO-CC and GO-MF
+# default is KEGG
+# to change the gene sets used for enrichment analysis
+result <- run_pathfindR(RA_input, gene_sets = "BioCarta")
 
 # to change the active subnetwork search algorithm (default = "GR", i.e. greedy algorithm)
 # for simulated annealing:
@@ -79,7 +84,7 @@ During enrichment analyses, pathways with adjusted-p values larger than the `enr
 
 This process of active subnetwork search and enrichment analyses is repeated for a selected number of iterations (indicated by the `iterations` argument of `run_pathfindR()`), which is performed in parallel via the R package `foreach`. 
 
-The wrapper function returns a data frame that contains the lowest and the highest adjusted-p values for each enriched pathway, as well as the numbers of times each pathway is encountered over all iterations. The first two rows of the example output of the patfindr-enrichment workflow (performed on the rheumatoid arthritis data `RA_output`) is shown below:
+The wrapper function returns a data frame that contains the lowest and the highest adjusted-p values for each enriched pathway, as well as the numbers of times each pathway is encountered over all iterations. The first two rows of the example output of the pathfindR-enrichment workflow (performed on the rheumatoid arthritis data `RA_output`) is shown below:
 
 ```{r}
 data("RA_output")
@@ -93,7 +98,7 @@ This document contains a table of the active subnetwork-oriented pathway enrichm
 
 - ID: KEGG ID of enriched pathway
 - Pathway: Description the pathway
-- Occurence: The number of times the pathway was found to be enriched over all iterations
+- occurrence: The number of times the pathway was found to be enriched over all iterations
 - lowest_p: the lowest adjusted-p value of the pathway over all iterations
 - higher_p: the highest adjusted-p value of the pathway over all iterations
 - Up_regulated: the up-regulated genes involved in the pathway
@@ -103,7 +108,7 @@ This document contains a table of the active subnetwork-oriented pathway enrichm
 This document contains a table of converted gene symbols. Columns are:
 
 - Old Symbol: the original gene symbol
-- Coverted Symbol: the alias symbol that was found in the PIN
+- Converted Symbol: the alias symbol that was found in the PIN
 - Change: the provided change value
 - p-value: the provided adjusted p value
 
@@ -111,7 +116,20 @@ This document contains a table of converted gene symbols. Columns are:
 
 <img src="./pw_clustering.png" width="650" height="163.34" />
 
-For this workflow, the wrapper function `choose_clusters()` is used. This function first calculates the pairwise distances between the pathways in the input data frame. This step uses the distance metric described by Chen et al. [1]. Via a shiny app, presented as an HTML document, the hierarchical clustering dendrogram is visualized. In this HTML document, the user can select the agglomeration method and the distance value at which to cut the tree. The dendrogram with the cut-off value marked with a red line is dynamically visualized and the resulting cluster assignments of the pathways along with annotation of representative pathways (chosen by smallest lowest p value) are presented as a table. This table can be saved as a csv file by pressing the button `Get Pathways w\ Cluster Info`.
+For this workflow, the wrapper function `choose_clusters()` is used. This function first calculates the pairwise distances between the pathways in the input data frame, automatically determining the gene sets used for analysis. This step uses the distance metric described by Chen et al. [1]. Via a shiny app, presented as an HTML document, the hierarchical clustering dendrogram is visualized. In this HTML document, the user can select the agglomeration method and the distance value at which to cut the tree. The dendrogram with the cut-off value marked with a red line is dynamically visualized and the resulting cluster assignments of the pathways along with annotation of representative pathways (chosen by smallest lowest p value) are presented as a table. This table can be saved as a csv file by pressing the button `Get Pathways w\ Cluster Info`.
+
+```{r eval=FALSE}
+# example run
+choose_clusters(RA_output)
+
+# to display the heatmap of pathway clustering
+choose_clusters(RA_output, plot_heatmap = TRUE)
+
+# to display the heatmap of pathway clustering 
+# and change agglomeration method (default = "average")
+choose_clusters(RA_output, agg_method = "complete", plot_heatmap = TRUE)
+
+```
 
 [1] *Chen YA, Tripathi LP, Dessailly BH, Nyström-persson J, Ahmad S, Mizuguchi K. Integrated pathway clusters with coherent biological themes for target prioritisation. PLoS ONE. 2014;9(6):e99030. \doi 10.1371/journal.pone.0099030 *
 

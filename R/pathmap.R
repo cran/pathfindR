@@ -9,7 +9,7 @@
 #'   presented. Columns are: "ID", "Pathway", "occurrence", "lowest_p",
 #'   "highest_p","Involved_genes". The function also creates visualizations of
 #'   the pathways with the package \code{pathview} and saves them in the folder
-#'   "pathway_maps" in the folder "pathfindr_Results" under the current working
+#'   "pathway_maps" in the folder "pathfindR_Results" under the current working
 #'   directory.
 #'
 #' @export
@@ -29,7 +29,7 @@ pathmap <- function(pw_table, gene_data) {
   ## fix KEGG names such as "Glycolysis / Gluconeogenesis"
   pw_table$Pathway <- gsub("\\/", "-", pw_table$Pathway)
 
-  upreg <- rownames(gene_data)[gene_data > 0] ## need log2 ratio
+  upreg <- rownames(gene_data)[gene_data >= 0] ## need log2 ratio
   downreg <- rownames(gene_data)[gene_data < 0]
 
   dir.create("pathway_maps")
