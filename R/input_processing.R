@@ -29,12 +29,12 @@ input_testing <- function(input, p_val_threshold){
 
   if (!is.numeric(p_val_threshold)){
     setwd("..")
-    stop("p_val_threshold must be a numeric value between 0 and 1")
+    stop("`p_val_threshold` must be a numeric value between 0 and 1")
   }
 
   if (p_val_threshold > 1 | p_val_threshold < 0){
     setwd("..")
-    stop("p_val_threshold must be between 0 and 1")
+    stop("`p_val_threshold` must be between 0 and 1")
   }
 
   if (!all(is.numeric(input[, 3]))) {
@@ -149,7 +149,6 @@ input_processing <- function(input, p_val_threshold, pin_path) {
                " (", round(perc, 2), "%) genes in the PIN\n\n"))
 
   ## Convert to appropriate symbol
-  converted <- converted[converted[, 2] != "NOT_FOUND", , drop = FALSE]
   input$new_gene <- input$GENE
   input$new_gene[match(converted[, 1], input$new_gene)] <- converted[, 2]
 

@@ -11,7 +11,8 @@ run_pathfindR(input, p_val_threshold = 0.05, enrichment_threshold = 0.05,
   gaMut = 0, grMaxDepth = 1, grSearchDepth = 1, grOverlap = 0.5,
   grSubNum = 1000, iterations = 10, n_processes = NULL,
   pin_name_path = "Biogrid", score_thr = 3, sig_gene_thr = 2,
-  gene_sets = "KEGG")
+  gene_sets = "KEGG", bubble = TRUE, output_dir = "pathfindR_Results",
+  list_active_snw_genes = FALSE, silent_option = TRUE)
 }
 \arguments{
 \item{input}{the input data that pathfindR uses. The input must be a data
@@ -81,22 +82,43 @@ to "Biogrid".}
 \item{sig_gene_thr}{threshold for minimum number of significant genes (Default = 2)}
 
 \item{gene_sets}{the gene sets to be used for enrichment analysis. Available gene sets
-are KEGG, Reactome, BioCarta, GO-BP, GO-CC and GO-MF(Default = "KEGG")}
+are KEGG, Reactome, BioCarta, GO-BP, GO-CC and GO-MF (Default = "KEGG")}
+
+\item{bubble}{boolean value. If TRUE, a bubble chart displaying the enrichment
+results is plotted. (default = TRUE)}
+
+\item{output_dir}{the directory to be created under the current working
+directory where the output and intermediate files are saved (default: "pathfindR_Results")}
+
+\item{list_active_snw_genes}{boolean value indicating whether or not to report
+the non-DEG active subnetwork genes for the active subnetwork which was enriched for
+the given pathway with the lowest p value (default = FALSE)}
+
+\item{silent_option}{boolean value indicating whether or not to print to the console (FALSE)
+or print to a file (TRUE) during active subnetwork search (default = TRUE)}
 }
 \value{
-Data frame of pathview enrichment results. Columns are: \describe{
+Data frame of pathfindR enrichment results. Columns are: \describe{
   \item{ID}{KEGG ID of the enriched pathway}
   \item{Pathway}{Description of the enriched pathway}
+  \item{Fold_Enrichment}{Fold enrichment value for the enriched pathway}
   \item{occurrence}{the number of iterations that the given pathway was found to enriched over all iterations}
   \item{lowest_p}{the lowest adjusted-p value of the given pathway over all iterations}
   \item{highest_p}{the highest adjusted-p value of the given pathway over all iterations}
+  \item{non_DEG_Active_Snw_Genes (OPTIONAL)}{the non-DEG active subnetwork genes, comma-separated}
   \item{Up_regulated}{the up-regulated genes in the input involved in the given pathway, comma-separated}
   \item{Down_regulated}{the down-regulated genes in the input involved in the given pathway, comma-separated}
 }
  The function also creates an HTML report with the pathfindR enrichment
  results linked to the visualizations of the pathways in addition to
  the table of converted gene symbols. This report can be found in
- "pathfindR_Results/results.html" under the current working directory.
+ "`output_dir`/results.html" under the current working directory.
+
+ Optionally, a bubble chart of enrichment results are plotted. The x-axis
+ corresponds to fold enrichment values while the y-axis indicates the enriched
+ pathways. Size of the bubble indicates the number of DEGs in the given pathway.
+ Color indicates the -log10(lowest-p) value; the more red it gets, the more significant
+ the pathway is.
 }
 \description{
 \code{run_pathfindR} is the wrapper function for the pathfindR workflow
@@ -133,5 +155,6 @@ run_pathfindR(RA_input)
  \code{\link{pathmap}} for annotation of involved genes and visualization of
  pathways. See \code{\link[foreach]{foreach}} for details on parallel
  execution of looping constructs. See \code{\link{choose_clusters}} for
- clustering the resulting enriched pathways.
+ clustering the resulting enriched pathways and partitioning into
+ clusters.
 }
