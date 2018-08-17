@@ -38,25 +38,29 @@ calculate_pw_scores <- function(pw_table, exp_mat,
     # some genes may not be in exp. matrix
     genes <- genes[genes %in% rownames(exp_mat)]
 
-    # subset exp. matrix to include only DEGs
-    sub_mat <- exp_mat[rownames(exp_mat) %in% genes, ]
+    if (length(genes) != 0) {
+      # subset exp. matrix to include only DEGs
+      sub_mat <- exp_mat[rownames(exp_mat) %in% genes, , drop = FALSE]
 
-    pw_score_matrix <- c()
-    for (gene in genes) {
-      gene_vec <- sub_mat[rownames(sub_mat) == gene, ]
+      pw_score_matrix <- c()
+      for (gene in genes) {
+        gene_vec <- sub_mat[rownames(sub_mat) == gene, ]
+        gene_vec <- as.numeric(gene_vec)
+        names(gene_vec) <- colnames(sub_mat)
 
-      # calculate mean and sd across samples
-      gene_mean <- mean(gene_vec)
-      gene_sd <- sd(gene_vec)
+        # calculate mean and sd across samples
+        gene_mean <- mean(gene_vec)
+        gene_sd <- sd(gene_vec)
 
-      gene_scores <- sapply(gene_vec, function(x) (x - gene_mean)/gene_sd)
-      pw_score_matrix <- rbind(pw_score_matrix, gene_scores)
-      rownames(pw_score_matrix)[nrow(pw_score_matrix)] <- gene
+        gene_scores <- sapply(gene_vec, function(x) (x - gene_mean)/gene_sd)
+        pw_score_matrix <- rbind(pw_score_matrix, gene_scores)
+        rownames(pw_score_matrix)[nrow(pw_score_matrix)] <- gene
+      }
+
+      pw_scores <- apply(pw_score_matrix, 2, mean)
+      all_pws_scores <- rbind(all_pws_scores, pw_scores)
+      rownames(all_pws_scores)[nrow(all_pws_scores)] <- pw_table$Pathway[i]
     }
-
-    pw_scores <- apply(pw_score_matrix, 2, mean)
-    all_pws_scores <- rbind(all_pws_scores, pw_scores)
-    rownames(all_pws_scores)[nrow(all_pws_scores)] <- pw_table$Pathway[i]
   }
 
   if (!is.null(cases)) {
@@ -98,6 +102,13 @@ plot_scores <- function(score_matrix, cases = NULL) {
   if (any(!cases %in% colnames(score_matrix)) & !is.null(cases))
     stop("Missing cases in the score matrix!")
 
+  ## sort according to activity
+
+  if (!is.null(cases)) {
+    tmp <- rowMeans(score_matrix[, cases, drop = FALSE])
+    score_matrix <- score_matrix[c(which(tmp >= 0), which(tmp < 0)),]
+  }
+
   ## transform the matrix
   var_names <- list()
   var_names[["Pathway"]] <- factor(rownames(score_matrix), levels = rev(rownames(score_matrix)))
@@ -120,7 +131,7 @@ plot_scores <- function(score_matrix, cases = NULL) {
                           legend.text = ggplot2::element_text(size = 12))
   g <- g + ggplot2::labs(fill = "Pathway\nscore")
   if (!is.null(cases)) {
-    g <- g + ggplot2::facet_wrap(~ Type, scales = "free_x")
+    g <- g + ggplot2::facet_grid(~ Type, scales = "free_x", space = "free")
     g <- g + ggplot2::theme(strip.text.x = ggplot2::element_text(size=12, face="bold"))
   }
   return(g)

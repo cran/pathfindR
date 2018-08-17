@@ -49,7 +49,13 @@
 #'@param score_thr active subnetwork score threshold (Default = 3)
 #'@param sig_gene_thr threshold for minimum number of significant genes (Default = 2)
 #'@param gene_sets the gene sets to be used for enrichment analysis. Available gene sets
-#'  are KEGG, Reactome, BioCarta, GO-BP, GO-CC and GO-MF (Default = "KEGG")
+#'  are KEGG, Reactome, BioCarta, GO-BP, GO-CC, GO-MF or Custom. If "Custom", the arguments
+#'  custom_genes and custom pathways must be specified. (Default = "KEGG")
+#'@param custom_genes a list containing the genes involved in each custom pathway. Each element
+#' is a vector of gene symbols located in the given pathway. Names correspond to
+#' the ID of the pathway.
+#'@param custom_pathways A list containing the descriptions for each custom pathway. Names of the
+#' list correspond to the ID of the pathway.
 #'@param bubble boolean value. If TRUE, a bubble chart displaying the enrichment
 #' results is plotted. (default = TRUE)
 #'@param output_dir the directory to be created under the current working
@@ -122,6 +128,7 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
                           pin_name_path = "Biogrid",
                           score_thr = 3, sig_gene_thr = 2,
                           gene_sets = "KEGG",
+                          custom_genes = NULL, custom_pathways = NULL,
                           bubble = TRUE,
                           output_dir = "pathfindR_Results",
                           list_active_snw_genes = FALSE,
@@ -131,8 +138,11 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
     stop("`search_method` must be one of \"GR\", \"SA\", \"GA\"")
 
   if (!gene_sets %in% c("KEGG", "Reactome", "BioCarta",
-                        "GO-BP", "GO-CC", "GO-MF"))
-    stop("`gene_sets` must be one of KEGG, Reactome, BioCarta, GO-BP, GO-CC or GO-MF")
+                        "GO-BP", "GO-CC", "GO-MF", "Custom"))
+    stop("`gene_sets` must be one of KEGG, Reactome, BioCarta, GO-BP, GO-CC, GO-MF or Custom")
+
+  if (gene_sets == "Custom" & (is.null(custom_genes) | is.null(custom_pathways)))
+    stop("You must provide both `custom_genes` and `custom_pathways` if `gene_sets` is `Custom`!")
 
   if (!is.logical(use_all_positives))
     stop("the argument `use_all_positives` must be either TRUE or FALSE")
@@ -144,11 +154,13 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
     stop("the argument `silent_option` must be either TRUE or FALSE")
 
   ## create output dir
-  if (dir.exists(output_dir))
-    stop(paste0("There already is a directoy named \"", output_dir,
-                "\". Change `output_dir` not to overwrite the previous results."))
+  if (dir.exists(output_dir)) {
+    warning(paste0("There already is a directoy named \"", output_dir,
+                   "\". Changing to \"", output_dir, "(1)\" not to overwrite the previous results."))
+    output_dir <- paste0(output_dir, "(1)")
+  }
 
-  dir.create(output_dir)
+  dir.create(output_dir, recursive = TRUE)
   setwd(output_dir)
 
   ## turn silent_option into an argument
@@ -172,11 +184,11 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
   pin_path <- return_pin_path(pin_name_path)
 
   ## Check input
-  cat("## Testing input\n\n")
+  message("## Testing input\n\n")
   input_testing(input, p_val_threshold)
 
   ## Process input
-  cat("## Processing input. Converting gene symbols, if necessary\n\n")
+  message("## Processing input. Converting gene symbols, if necessary\n\n")
   input_processed <- input_processing(input, p_val_threshold, pin_path)
 
   dir.create("active_snw_search")
@@ -185,7 +197,7 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
                      row.names = FALSE, quote = FALSE, sep = "\t")
 
   ## Prep for parallel run
-  cat("## Performing Active Subnetwork Search and Enrichment\n")
+  message("## Performing Active Subnetwork Search and Enrichment\n")
   # calculate the number of cores, if necessary
   if (is.null(n_processes))
     n_processes <- parallel::detectCores() - 1
@@ -230,7 +242,7 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
     snws <- pathfindR::parseActiveSnwSearch(
       "resultActiveSubnetworkSearch.txt", input_processed$GENE)
 
-    cat(paste0("Found ", length(snws), " active subnetworks\n\n"))
+    message(paste0("Found ", length(snws), " active subnetworks\n\n"))
 
     if (gene_sets == "KEGG") {
       genes_by_pathway <- pathfindR::kegg_genes
@@ -250,6 +262,9 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
     } else if (gene_sets == "GO-MF") {
       genes_by_pathway <- pathfindR::go_mf_genes
       pathways_list <- pathfindR::go_mf_pathways
+    } else if (gene_sets == "Custom") {
+      genes_by_pathway <- custom_genes
+      pathways_list <- custom_pathways
     }
 
     ## enrichment per subnetwork
@@ -277,11 +292,12 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
 
   if (is.null(final_res)) {
     setwd("..")
-    stop("Did not find any enriched pathways!")
+    warning("Did not find any enriched pathways!")
+    return(data.frame())
   }
 
   ## Annotate lowest p, highest p and occurrence
-  cat("## Processing the enrichment results over all iterations \n\n")
+  message("## Processing the enrichment results over all iterations \n\n")
 
   lowest_p <- tapply(final_res$adj_p, final_res$ID, min)
   highest_p <- tapply(final_res$adj_p, final_res$ID, max)
@@ -306,7 +322,7 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
   final_res <- final_res[!duplicated(final_res$ID), ]
   rownames(final_res) <- NULL
 
-  cat("## Annotating involved genes and visualizing pathways\n\n")
+  message("## Annotating involved genes and visualizing pathways\n\n")
   if (gene_sets == "KEGG") {
     ## Annotate involved genes and generate pathway maps
     genes_df <- input_processed[, c("GENE", "CHANGE")]
@@ -314,26 +330,29 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
     genes_df <- genes_df[, -1, drop = FALSE]
     final_res <- pathmap(final_res, genes_df)
   } else {
+
+    if (gene_sets == "Reactome") {
+      genes_by_pathway <- pathfindR::reactome_genes
+    } else if (gene_sets == "BioCarta") {
+      genes_by_pathway <- pathfindR::biocarta_genes
+    } else if (gene_sets == "GO-BP") {
+      genes_by_pathway <- pathfindR::go_bp_genes
+    } else if (gene_sets == "GO-CC") {
+      genes_by_pathway <- pathfindR::go_cc_genes
+    } else if (gene_sets == "GO-MF") {
+      genes_by_pathway <- pathfindR::go_mf_genes
+    } else if (gene_sets == "Custom") {
+      genes_by_pathway <- custom_genes
+    }
+
     upreg <- input_processed$GENE[input_processed$CHANGE >= 0]
     downreg <- input_processed$GENE[input_processed$CHANGE < 0]
 
     final_res$Down_regulated <- final_res$Up_regulated <- NA
 
-    if (gene_sets == "Reactome") {
-      gsets <- pathfindR::reactome_genes
-    } else if (gene_sets == "BioCarta") {
-      gsets <- pathfindR::biocarta_genes
-    } else if (gene_sets == "GO-BP") {
-      gsets <- pathfindR::go_bp_genes
-    } else if (gene_sets == "GO-CC") {
-      gsets <- pathfindR::go_cc_genes
-    } else if (gene_sets == "GO-MF") {
-      gsets <- pathfindR::go_mf_genes
-    }
-
     for (i in 1:nrow(final_res)) {
-      idx <- which(names(gsets) == final_res$ID[i])
-      temp <- gsets[[idx]]
+      idx <- which(names(genes_by_pathway) == final_res$ID[i])
+      temp <- genes_by_pathway[[idx]]
       final_res$Up_regulated[i] <- paste(temp[temp %in% upreg], collapse = ", ")
       final_res$Down_regulated[i] <- paste(temp[temp %in% downreg], collapse = ", ")
     }
@@ -341,7 +360,7 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
   }
 
 
-  cat("## Creating HTML report\n\n")
+  message("## Creating HTML report\n\n")
   ## Create report
   rmarkdown::render(system.file("rmd/results.Rmd", package = "pathfindR"),
                     output_dir = ".")
@@ -354,14 +373,14 @@ run_pathfindR <- function(input, p_val_threshold = 5e-2,
 
   ## Bubble Chart
   if (bubble) {
-    cat("Plotting the enrichment bubble chart\n\n")
+    message("Plotting the enrichment bubble chart\n\n")
     graphics::plot(enrichment_chart(final_res))
   }
 
-  cat("Pathway enrichment results and converted genes ")
-  cat("can be found in \"results.html\" ")
-  cat(paste0("in the folder \"", output_dir, "\"\n\n"))
-  cat("Run choose_clusters() for clustering pathways\n\n")
+  message("Pathway enrichment results and converted genes ")
+  message("can be found in \"results.html\" ")
+  message(paste0("in the folder \"", output_dir, "\"\n\n"))
+  message("Run choose_clusters() for clustering pathways\n\n")
 
   return(final_res)
 }
@@ -422,7 +441,7 @@ enrichment_chart <- function(result_df, plot_by_cluster = FALSE) {
   g <- g + ggplot2::scale_color_continuous(low = "#f5efef", high = "red")
 
   if (plot_by_cluster & "Cluster" %in% colnames(result_df)) {
-    g <- g + ggplot2::facet_grid(result_df$Cluster~., scales = "free_y", drop = TRUE)
+    g <- g + ggplot2::facet_grid(result_df$Cluster~., scales = "free_y", space = "free", drop = TRUE)
   } else if (plot_by_cluster) {
     warning("For plotting by cluster, there must a column named `Cluster` in the input data frame!")
   }
@@ -503,22 +522,32 @@ choose_clusters <- function(result_df, auto = TRUE, agg_method = "average",
   if (!is.logical(plot_heatmap))
     stop("The argument `plot_dend` must be either TRUE or FALSE!")
 
+  ## Check if clustering should be performed
+
+  if (nrow(result_df) < 3)
+  {
+    warning("There are less than 3 pathways in result_df so clustering is not performed!")
+    result_df$Cluster <- 1:nrow(result_df)
+    result_df$Status <- "Representative"
+    return(result_df)
+  }
+
   ## Create PWD matrix
-  cat("Calculating pairwise distances between pathways\n\n")
+  message("Calculating pairwise distances between pathways\n\n")
   PWD_mat <- pathfindR::calculate_pwd(result_df$ID,
                                       agg_method = agg_method,
                                       plot_heatmap = plot_heatmap)
   if (!auto) {
-    cat("Creating the shiny app\n\n")
+    message("Creating the shiny app\n\n")
     parameters <- list(df = result_df, mat = PWD_mat)
     rmarkdown::run(system.file("rmd/clustering.Rmd", package = "pathfindR"),
                    render_args = list(output_dir = ".", params = parameters))
   } else {### Calculate PWDs and Cluster
-    cat("Clustering pathways\n\n")
+    message("Clustering pathways\n\n")
     hclu <- stats::hclust(as.dist(PWD_mat), method = agg_method)
 
     ### Optimal k
-    cat("Calculating the optimal number of clusters (based on average silhouette width)\n\n")
+    message("Calculating the optimal number of clusters (based on average silhouette width)\n\n")
     kmax <- nrow(PWD_mat) - 1
     avg_sils <- c()
     for (i in 2:kmax)
@@ -526,16 +555,16 @@ choose_clusters <- function(result_df, auto = TRUE, agg_method = "average",
                                                  stats::cutree(hclu, k = i),
                                                  silhouette = TRUE)$avg.silwidth)
 
-    k <- (2:kmax)[which.max(avg_sils)]
+    k_opt <- (2:kmax)[which.max(avg_sils)]
     if (plot_dend) {
       graphics::plot(hclu, hang = -1)
-      stats::rect.hclust(hclu, k = k)
+      stats::rect.hclust(hclu, k = k_opt)
     }
-    cat(paste("The maximum average silhouette width was", round(max(avg_sils), 2),
-              "for k =", k, "\n\n"))
+    message(paste("The maximum average silhouette width was", round(max(avg_sils), 2),
+              "for k =", k_opt, "\n\n"))
 
     ### Return Optimal Clusters
-    clusters <- cutree(hclu, k = k)
+    clusters <- cutree(hclu, k = k_opt)
 
     result_df$Cluster <- clusters[match(result_df$ID, names(clusters))]
     tmp <- result_df$lowest_p
@@ -546,7 +575,7 @@ choose_clusters <- function(result_df, auto = TRUE, agg_method = "average",
     result_df <- result_df[order(result_df$Status, decreasing = TRUE), ]
     result_df <- result_df[order(result_df$Cluster), ]
 
-    cat("Returning the resulting data frame\n\n")
+    message("Returning the resulting data frame\n\n")
     return(result_df)
     }
 }

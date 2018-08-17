@@ -83,3 +83,46 @@ cases <- c("GSM389703", "GSM389704", "GSM389706", "GSM389708",
 ## Calculate pathway scores and plot heatmap
 score_matrix <- calculate_pw_scores(pws_table, exp_mat, cases)
 
+## ------------------------------------------------------------------------
+## CREB target genes
+CREB_targets <- normalizePath(system.file("extdata/CREB.txt",
+                                      package = "pathfindR"))
+CREB_targets <- read.delim(CREB_targets, skip = 2, header = FALSE, stringsAsFactors = FALSE)
+CREB_targets <- CREB_targets$V1
+
+## MYC target genes
+MYC_targets <- normalizePath(system.file("extdata/MYC.txt",
+                                      package = "pathfindR"))
+MYC_targets <- read.delim(MYC_targets, skip = 2, header = FALSE, stringsAsFactors = FALSE)
+MYC_targets <- MYC_targets$V1
+
+## Prep for use
+custom_genes <- list(CREB_targets, MYC_targets)
+names(custom_genes) <- c("TF1", "TF2")
+
+custom_pathways <- c("CREB target genes", "MYC target genes")
+names(custom_pathways) <- c("TF1", "TF2")
+
+## ------------------------------------------------------------------------
+set.seed(123)
+selected_genes <- sample(MYC_targets, 50)
+selected_genes <- c(selected_genes,
+                    sample(CREB_targets, 5))
+input <- data.frame(Gene.symbol = selected_genes,
+                    logFC = 1.5,
+                    adj.P.Val = 0.001)
+head(input)
+
+## ----eval=FALSE----------------------------------------------------------
+#  custom_result <- run_pathfindR(input,
+#                                 gene_sets = "Custom",
+#                                 custom_genes = custom_genes,
+#                                 custom_pathways = custom_pathways,
+#                                 iterations = 1)
+
+## ----include = FALSE-----------------------------------------------------
+data(custom_result)
+
+## ------------------------------------------------------------------------
+knitr::kable(custom_result)
+
