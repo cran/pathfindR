@@ -436,7 +436,7 @@ enrichment_chart <- function(result_df, plot_by_cluster = FALSE) {
   g <- g + ggplot2::theme(axis.text.x = ggplot2::element_text(size = 10),
                           axis.text.y = ggplot2::element_text(size = 10),
                           plot.title = ggplot2::element_blank())
-  g <- g + ggplot2::xlab("Fold Enrichment") + ggplot2::ylab('')
+  g <- g + ggplot2::xlab("Fold Enrichment") + ggplot2::ylab("")
   g <- g + ggplot2::labs(size = "# of DEGs", color = "-log10(lowest-p)")
   g <- g + ggplot2::scale_color_continuous(low = "#f5efef", high = "red")
 
@@ -470,6 +470,7 @@ enrichment_chart <- function(result_df, plot_by_cluster = FALSE) {
 #'   \item{lowest_p}{the lowest adjusted-p value of the given pathway over all iterations}
 #'   \item{highest_p}{the highest adjusted-p value of the given pathway over all iterations}
 #'   }
+#' @param p_val_threshold p value threshold for filtering the pathways prior to clustering (default: 0.05)
 #' @param auto boolean value indicating whether to select the optimal number of clusters
 #' automatically. If FALSE, a shiny application is displayed, where the user can manually
 #' partition the clustering dendrogram (default: TRUE).
@@ -510,8 +511,9 @@ enrichment_chart <- function(result_df, plot_by_cluster = FALSE) {
 #'   for the wrapper function of the pathfindR enrichment workflow.
 #'
 #' @examples
-#' choose_clusters(RA_output)
-choose_clusters <- function(result_df, auto = TRUE, agg_method = "average",
+#' ## Cluster pathways with p <= 0.01
+#' choose_clusters(RA_output, p_val_threshold = 0.01)
+choose_clusters <- function(result_df, p_val_threshold = 0.05, auto = TRUE, agg_method = "average",
                             plot_heatmap = FALSE, plot_dend = FALSE, use_names = FALSE, custom_genes = NULL) {
   ## argument checks
   if (!is.logical(auto))
@@ -527,15 +529,24 @@ choose_clusters <- function(result_df, auto = TRUE, agg_method = "average",
   if (!is.logical(plot_heatmap))
     stop("The argument `plot_dend` must be either TRUE or FALSE!")
 
+  if (!is.numeric(p_val_threshold))
+    stop("`p_val_threshold` must be a numeric value between 0 and 1")
+
+  if (p_val_threshold > 1 | p_val_threshold < 0)
+    stop("`p_val_threshold` must be between 0 and 1")
+
+
   ## Check if clustering should be performed
 
-  if (nrow(result_df) < 3)
-  {
+  if (nrow(result_df) < 3) {
     warning("There are less than 3 pathways in result_df so clustering is not performed!")
     result_df$Cluster <- 1:nrow(result_df)
     result_df$Status <- "Representative"
     return(result_df)
   }
+
+  ## Filter for p value
+  result_df <- result_df[result_df$highest_p <= p_val_threshold, ]
 
   ## Create PWD matrix
   message("Calculating pairwise distances between pathways\n\n")
