@@ -1,6 +1,22 @@
-# pathfindR 1.2.3
+# pathfindR 1.3.0
+
 ## Major Changes
--
+- Separated the steps of the function `run_pathfindR` into individual functions: `active_snw_search`, `enrichment_analyses`, `summarize_enrichment_results`, `annotate_pathway_DEGs`, `visualize_pws`.
+- renamed the function `pathmap` as `visualize_hsa_KEGG`, updated the function to produce different visualizations for inputs with binary change values (ordered) and no change values (the `input_processing` function, assigns a change value of 100 to all).
+- Created new the visualization function `visualize_pw_interactions`, which creates PNG files visualizing the interactions (in the selected PIN) of genes involved in the given pathways.
+- Added new vignette, describing the step-by-step execution of the pathfindR workflow
+- Changed clustering metric to kappa statistic, created the new clustering related functions `create_kappa_matrix`, `hierarchical_pw_clustering`, `fuzzy_pw_clustering` and `cluster_pathways`.
+- Implemented the new function `cluster_graph_vis` for visualing graph diagrams of clustering results.
+
+## Minor changes and bug fixes
+- Fixed the bug where the arguments `score_quan_thr` and `sig_gene_thr` for `run_pathfindR` were not being utilized.
+- in `run_pathfindR`, added message at the end of run, reporting the number enriched pathways.
+- the function `run_pathfindR` now creates a variable `org_dir` that is the "path/to/original/working/directory". `org_dir` is used in multiple funtions to return to the original working directory if anything fails. This changes the previous behavior where if a function stopped with an error the directory was changed to "..", i.e. the parent directory. This change was adapted so that the user is returned to the original working directory if they supply a recursive output folder (`output_dir`, e.g. "./ALL_RESULTS/RESULT_A"). 
+- in `input_processing`, added the argument `human_genes` to only perform alias symbol conversion when human gene symbols are provided. - Updated the Rmd files used to create the report HTML files
+- Added the data for `GO-All`, all annotations in the GO database (BP+MF+CC)
+- Updated the vignette `pathfindR - An R Package for Pathway Enrichment Analysis Utilizing Active Subnetworks` to reflect the new functionalities.
+
+# pathfindR 1.2.3
 ## Minor changes and bug fixes
 - in the funtion `plot_scores`, added the argument `label_cases` to indicate whether or not to label the cases in the pathway scoring heatmap plot. Also added the argument `case_control_titles` which allows the user to change the default ‘Case’ and ‘Control’ headers. Also added the arguments `low` and `high` used to change the low and high end colors of the scoring color gradient.
 - in the funtion `plot_scores`, reversed the color gradient to match the coloring scheme used by pathview (i.e. red for positive values, green for negative values)

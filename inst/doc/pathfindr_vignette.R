@@ -44,25 +44,25 @@ knitr::kable(head(RA_input))
 data("RA_output")
 knitr::kable(head(RA_output, 2))
 
-## ---- fig.height=4, fig.width=8------------------------------------------
+## ----hierarchical, fig.height=4, fig.width=8-----------------------------
 data("RA_output")
-RA_clustered <- choose_clusters(RA_output)
-## First 2 rows of clustered pathways data frame
+RA_clustered <- cluster_pathways(RA_output)
+## First 2 rows of clustered terms data frame
 knitr::kable(head(RA_clustered, 2))
-## The 16 representative pathways
+## The 8 representative terms
 knitr::kable(RA_clustered[RA_clustered$Status == "Representative", ])
 
-# to display the heatmap of pathway clustering
-RA_clustered <- choose_clusters(RA_output, plot_heatmap = TRUE)
+# to display the heatmap of kappa statistics
+RA_clustered <- cluster_pathways(RA_output, plot_hmap = TRUE, plot_clusters_graph = FALSE)
 
-# to display the dendrogram and clusters
-RA_clustered <- choose_clusters(RA_output, plot_dend = TRUE)
+# to display the dendrogram and optimal clusters
+RA_clustered <- cluster_pathways(RA_output, plot_dend = TRUE, plot_clusters_graph = FALSE)
 
 # to change agglomeration method (default = "average")
-RA_clustered <- choose_clusters(RA_output, agg_method = "centroid")
+RA_clustered <- cluster_pathways(RA_output, hclu_method = "centroid")
 
-## ----eval=FALSE----------------------------------------------------------
-#  choose_clusters(RA_output, auto = FALSE)
+## ----fuzzy, fig.height=4, fig.width=8------------------------------------
+RA_clustered <- cluster_pathways(RA_output, method = "fuzzy")
 
 ## ---- fig.height=4, fig.width=8------------------------------------------
 ## Pathway data frame
