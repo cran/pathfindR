@@ -4,59 +4,55 @@
 \alias{enrichment_analyses}
 \title{Perform Enrichment Analyses on the Input Subnetworks}
 \usage{
-enrichment_analyses(snws, input_genes, gene_sets = "KEGG",
-  custom_genes = NULL, custom_pathways = NULL, pin_path,
+enrichment_analyses(snws, sig_genes_vec, pin_name_path = "Biogrid",
+  genes_by_term = pathfindR::kegg_genes,
+  term_descriptions = pathfindR::kegg_descriptions,
   adj_method = "bonferroni", enrichment_threshold = 0.05,
   list_active_snw_genes = FALSE)
 }
 \arguments{
 \item{snws}{a list of subnetwork genes (i.e., vectors of genes for each subnetwork)}
 
-\item{input_genes}{vector of input gene symbols (that were used during active subnetwork genes)}
+\item{sig_genes_vec}{vector of significant gene symbols. In the scope of this
+package, these are the input genes that were used for active subnetwork search}
 
-\item{gene_sets}{the gene sets used for enrichment analysis. Available gene sets
-are KEGG, Reactome, BioCarta, GO-All, GO-BP, GO-CC, GO-MF or Custom. If "Custom", the arguments
-custom_genes and custom pathways must be specified. (Default = "KEGG")}
+\item{pin_name_path}{Name of the chosen PIN or path/to/PIN.sif. If PIN name,
+must be one of c("Biogrid", "STRING", "GeneMania", "IntAct", "KEGG", "mmu_STRING"). If
+path/to/PIN.sif, the file must comply with the PIN specifications. (Default = "Biogrid")}
 
-\item{custom_genes}{a list containing the genes involved in each custom pathway. Each element
-is a vector of gene symbols located in the given pathway. Names correspond to
-the ID of the pathway.}
+\item{genes_by_term}{List that contains genes for each gene set. Names of
+this list are gene set IDs (default = kegg_genes)}
 
-\item{custom_pathways}{A list containing the descriptions for each custom pathway. Names of the
-list correspond to the ID of the pathway.}
+\item{term_descriptions}{Vector that contains term descriptions for the
+gene sets. Names of this vector are gene set IDs (default = kegg_descriptions)}
 
-\item{pin_path}{path to the Protein Interaction Network (PIN) file used in
-the analysis}
+\item{adj_method}{correction method to be used for adjusting p-values.
+(default = "bonferroni")}
 
-\item{adj_method}{correction method to be used for adjusting p-values of
-pathway enrichment results (Default: 'bonferroni', see ?p.adjust)}
-
-\item{enrichment_threshold}{threshold used when filtering individual iterations' pathway
-enrichment results}
+\item{enrichment_threshold}{adjusted-p value threshold used when filtering
+enrichment results (default = 0.05)}
 
 \item{list_active_snw_genes}{boolean value indicating whether or not to report
-the non-DEG active subnetwork genes for the active subnetwork which was enriched for
-the given pathway with the lowest p value (default = FALSE)}
+the non-significant active subnetwork genes for the active subnetwork which was enriched for
+the given term with the lowest p value (default = \code{FALSE})}
 }
 \value{
 a dataframe of combined enrichment results. Columns are: \describe{
-  \item{ID}{KEGG ID of the enriched pathway}
-  \item{Pathway}{Description of the enriched pathway}
-  \item{Fold_Enrichment}{Fold enrichment value for the enriched pathway}
+  \item{ID}{ID of the enriched term}
+  \item{Term_Description}{Description of the enriched term}
+  \item{Fold_Enrichment}{Fold enrichment value for the enriched term}
   \item{p_value}{p value of enrichment}
   \item{adj_p}{adjusted p value of enrichment}
-  \item{non_DEG_Active_Snw_Genes (OPTIONAL)}{the non-DEG active subnetwork genes, comma-separated}
+  \item{non_Signif_Snw_Genes (OPTIONAL)}{the non-significant active subnetwork genes, comma-separated}
 }
 }
 \description{
 Perform Enrichment Analyses on the Input Subnetworks
 }
 \examples{
-\dontrun{
-enr_res <- enrichment_analyses(snws, input_genes = my_input$GENE,
-gene_sets = "KEGG", pin_path = "path/to/PIN")
-}
-
+enr_res <- enrichment_analyses(snws = example_active_snws[1:2],
+                               sig_genes_vec = RA_input$Gene.symbol[1:25],
+                               pin_name_path = "KEGG")
 }
 \seealso{
 \code{\link{enrichment}} for the enrichment analysis for a single gene set

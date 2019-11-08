@@ -1,13 +1,14 @@
-#' Hypergeometic Distribution-based Hypothesis Testing
+#' Hypergeometric Distribution-based Hypothesis Testing
 #'
-#' @param pw_genes vector of genes in the selected pathway
+#' @param term_genes vector of genes in the selected term gene set
 #' @param chosen_genes vector containing the set of input genes
-#' @param all_genes vector of "all" genes (background)
+#' @param background_genes vector of background genes (i.e. universal set of
+#' genes in the experiment)
 #'
 #' @return the p-value as determined using the hypergeometric distribution.
 #'
-#' @details To determine whether the `chosen genes` are enriched
-#' (compared to a background pool of genes) in the `pw_genes`, the
+#' @details To determine whether the \code{chosen_genes} are enriched
+#' (compared to a background pool of genes) in the \code{term_genes}, the
 #' hypergeometric distribution is assumed and the appropriate p value
 #' (the value under the right tail) is calculated and returned.
 #'
@@ -17,132 +18,184 @@
 #' hyperg_test(letters[1:5], letters[2:5], letters)
 #' hyperg_test(letters[1:5], letters[2:10], letters)
 #' hyperg_test(letters[1:5], letters[2:13], letters)
-hyperg_test <- function(pw_genes, chosen_genes, all_genes) {
-  pw_genes_selected <- length(intersect(chosen_genes, pw_genes))
-  pw_genes_in_pool <- length(pw_genes)
-  tot_genes_in_pool <- length(all_genes)
-  non_pw_genes_in_pool <- tot_genes_in_pool - pw_genes_in_pool
+hyperg_test <- function(term_genes, chosen_genes, background_genes) {
+
+  #### Argument checks
+  if (!is.atomic(term_genes)) {
+    stop("`term_genes` should be a vector")
+  }
+  if (!is.atomic(chosen_genes)) {
+    stop("`chosen_genes` should be a vector")
+  }
+  if(!is.atomic(background_genes)) {
+    stop("`background_genes` should be a vector")
+  }
+
+  if (length(term_genes) > length(background_genes)) {
+    stop("`term_genes` cannot be larger than `background_genes`!")
+  }
+  if (length(chosen_genes) > length(background_genes)) {
+    stop("`chosen_genes` cannot be larger than `background_genes`!")
+  }
+
+  #### Calculate p value
+  term_genes_selected <- sum(chosen_genes %in% term_genes)
+  term_genes_in_pool <- sum(term_genes %in% background_genes)
+  tot_genes_in_pool <- length(background_genes)
+  non_term_genes_in_pool <- tot_genes_in_pool - term_genes_in_pool
   num_selected_genes <- length(chosen_genes)
 
-  p_val <- stats::phyper(pw_genes_selected - 1, pw_genes_in_pool,
-                         non_pw_genes_in_pool, num_selected_genes,
+  p_val <- stats::phyper(term_genes_selected - 1, term_genes_in_pool,
+                         non_term_genes_in_pool, num_selected_genes,
                          lower.tail = FALSE)
   return(p_val)
 }
 
 #' Perform Enrichment Analysis for a Single Gene Set
 #'
-#' @param genes_by_pathway List that contains genes for each pathway. Names of
-#'   this list are KEGG IDs.
-#' @param genes_of_interest The set of gene symbols to be used for enrichment
+#' @param input_genes The set of gene symbols to be used for enrichment
 #'   analysis. In the scope of this package, these are genes that were
-#'   identified for an active subnetwork.
-#' @param pathways_list List that contains pathway descriptions for KEGG pathway
-#'   IDs. Names of this list are KEGG IDs.
+#'   identified for an active subnetwork
+#' @param genes_by_term List that contains genes for each gene set. Names of
+#'   this list are gene set IDs (default = kegg_genes)
+#' @param term_descriptions Vector that contains term descriptions for the
+#'   gene sets. Names of this vector are gene set IDs (default = kegg_descriptions)
 #' @param adj_method correction method to be used for adjusting p-values.
+#'   (default = "bonferroni")
 #' @param enrichment_threshold adjusted-p value threshold used when filtering
-#'   pathway enrichment results
-#' @param pin_path path to the Protein-Protein Interaction Network (PIN) file used in
-#'   the analysis
-#' @param DEG_vec vector of differentially-expressed gene symbols
+#'   enrichment results (default = 0.05)
+#' @param sig_genes_vec vector of significant gene symbols. In the scope of this
+#'   package, these are the input genes that were used for active subnetwork search
+#' @param background_genes vector of background genes. In the scope of this package,
+#'   the background genes are taken as all genes in the PIN
+#'   (see \code{\link{enrichment_analyses}})
 #'
-#' @return A data frame that contains enrichment results.
+#' @return A data frame that contains enrichment results
 #' @export
 #' @seealso \code{\link[stats]{p.adjust}} for adjustment of p values. See
 #'   \code{\link{run_pathfindR}} for the wrapper function of the pathfindR
 #'   workflow. \code{\link{hyperg_test}} for the details on hypergeometric
 #'   distribution-based hypothesis testing.
 #' @examples
-#' pin_path <- return_pin_path("KEGG")
-#' enrichment(kegg_genes, c("PER1", "PER2", "CRY1", "CREB1"), kegg_pathways,
-#'            "bonferroni", 0.05, pin_path, c("PER1"))
-enrichment <- function(genes_by_pathway, genes_of_interest,
-                       pathways_list, adj_method = "bonferroni",
-                       enrichment_threshold, pin_path, DEG_vec) {
+#' enrichment(input_genes = c("PER1", "PER2", "CRY1", "CREB1"),
+#'            sig_genes_vec = "PER1",
+#'            background_genes = unlist(kegg_genes))
+enrichment <- function(input_genes,
+                       genes_by_term = pathfindR::kegg_genes,
+                       term_descriptions = pathfindR::kegg_descriptions,
+                       adj_method = "bonferroni",
+                       enrichment_threshold = 5e-2,
+                       sig_genes_vec,
+                       background_genes) {
 
-  pin <- utils::read.delim(file = pin_path, header = FALSE,
-                           stringsAsFactors = FALSE)
-  all_genes <- unique(c(pin$V1, pin$V2))
+  #### Argument checks
+  ## input genes
+  if (!is.atomic(input_genes)) {
+    stop("`input_genes` should be a vector of gene symbols")
+  }
 
-  ## Hypergeometric test for p value
-  enrichment_res <- sapply(genes_by_pathway, pathfindR::hyperg_test,
-                             genes_of_interest, all_genes)
+  ## gene sets data
+  if (!is.list(genes_by_term)) {
+    stop("`genes_by_term` should be a list of term gene sets")
+  }
+  if (is.null(names(genes_by_term))) {
+    stop("`genes_by_term` should be a named list (names are gene set IDs)")
+  }
+
+  if (!is.atomic(term_descriptions)) {
+    stop("`term_descriptions` should be a vector of term gene descriptions")
+  }
+  if (is.null(names(term_descriptions))) {
+    stop("`term_descriptions` should be a named vector (names are gene set IDs)")
+  }
+
+  if (length(genes_by_term) != length(term_descriptions)) {
+    stop("The lengths of `genes_by_term` and `term_descriptions` should be the same")
+  }
+  if (any(names(genes_by_term) != names(term_descriptions))) {
+    stop("The names of `genes_by_term` and `term_descriptions` should all be the same")
+  }
+
+  ## enrichment threshold
+  if (!is.numeric(enrichment_threshold)) {
+    stop("`enrichment_threshold` should be a numeric value between 0 and 1")
+  }
+  if (enrichment_threshold < 0 | enrichment_threshold > 1) {
+    stop("`enrichment_threshold` should be between 0 and 1")
+  }
+
+  ## signif. genes and background (universal set) genes
+  if (!is.atomic(sig_genes_vec)) {
+    stop("`sig_genes_vec` should be a vector")
+  }
+  if (!is.atomic(background_genes)) {
+    stop("`background_genes` should be a vector")
+  }
+
+  #### Obtain p values
+  enrichment_res <- vapply(genes_by_term, pathfindR::hyperg_test, 0.1,
+                           input_genes, background_genes)
   enrichment_res <- as.data.frame(enrichment_res)
   colnames(enrichment_res) <- "p_value"
 
-  ## Fold enrinchment
-  fe_calc <- function(x) {
-    A <- sum(genes_of_interest %in% x) / length(genes_of_interest)
-    B <- sum(all_genes %in% x) / length(all_genes)
-    return(A / B)
-  }
-  enrichment_res$Fold_Enrichment <- sapply(genes_by_pathway, fe_calc)
-
-
+  # Adjust p values
   idx <- order(enrichment_res$p_value)
-  enrichment_res <- enrichment_res[idx,, drop = FALSE]
+  enrichment_res <- enrichment_res[idx, , drop = FALSE]
   enrichment_res$adj_p <- stats::p.adjust(enrichment_res$p, method = adj_method)
 
-  if (all(enrichment_res$adj_p > enrichment_threshold))
+
+  #### Filter by adj-p
+  cond <- enrichment_res$adj_p <= enrichment_threshold
+  # Empty case (if all adj-p > threshold)
+  if (sum(cond) == 0)
     return(NULL)
-  else {
-    cond <- enrichment_res$adj_p <= enrichment_threshold
-    enrichment_res <- enrichment_res[cond, ]
+  enrichment_res <- enrichment_res[cond, ]
 
-    ## pathway IDs
-    enrichment_res$ID <- rownames(enrichment_res)
+  #### Add other columns
+  # Term IDs
+  enrichment_res$ID <- rownames(enrichment_res)
 
-    ## Pathway descriptions
-    idx <- match(enrichment_res$ID, names(pathways_list))
-    enrichment_res$Pathway <- pathways_list[idx]
+  ## Term descriptions
+  idx <- match(enrichment_res$ID, names(term_descriptions))
+  enrichment_res$Term_Description <- term_descriptions[idx]
 
-    ## non-DEG Active Subnetwork Genes
-    tmp <- genes_of_interest[!genes_of_interest %in% DEG_vec]
+  # Fold enrinchment
+  gset_for_fe <- genes_by_term[rownames(enrichment_res)]
+  A <- vapply(gset_for_fe, function(gset) length(intersect(sig_genes_vec, gset)), 1L) / length(sig_genes_vec)
+  B <- vapply(gset_for_fe, function(gset) length(intersect(background_genes, gset)), 1L) / length(background_genes)
+  enrichment_res$Fold_Enrichment <- A / B
 
-    for (i in 1:nrow(enrichment_res)) {
-      tmp2 <- tmp[tmp %in% genes_by_pathway[[enrichment_res$ID[i]]]]
-      enrichment_res$non_DEG_Active_Snw_Genes[i] <- paste(tmp2, collapse = ", ")
-    }
-
-    ## reorder columns
-    to_order <- c("ID", "Pathway", "Fold_Enrichment",
-                  "p_value", "adj_p", "non_DEG_Active_Snw_Genes")
-    enrichment_res <- enrichment_res[, to_order]
-
-    return(enrichment_res)
+  # Non-significant Subnetwork Genes
+  non_sig_snw_genes <- base::setdiff(input_genes, sig_genes_vec)
+  for (i in base::seq_len(nrow(enrichment_res))) {
+    tmp <- intersect(non_sig_snw_genes, genes_by_term[[enrichment_res$ID[i]]])
+    enrichment_res$non_Signif_Snw_Genes[i] <- paste(tmp, collapse = ", ")
   }
+
+  ## reorder columns
+  to_order <- c("ID", "Term_Description", "Fold_Enrichment",
+                "p_value", "adj_p", "non_Signif_Snw_Genes")
+  enrichment_res <- enrichment_res[, to_order]
+
+  return(enrichment_res)
 }
 
 #' Perform Enrichment Analyses on the Input Subnetworks
 #'
 #' @param snws a list of subnetwork genes (i.e., vectors of genes for each subnetwork)
-#' @param gene_sets the gene sets used for enrichment analysis. Available gene sets
-#'  are KEGG, Reactome, BioCarta, GO-All, GO-BP, GO-CC, GO-MF or Custom. If "Custom", the arguments
-#'  custom_genes and custom pathways must be specified. (Default = "KEGG")
-#' @param custom_genes a list containing the genes involved in each custom pathway. Each element
-#' is a vector of gene symbols located in the given pathway. Names correspond to
-#' the ID of the pathway.
-#' @param custom_pathways A list containing the descriptions for each custom pathway. Names of the
-#' list correspond to the ID of the pathway.
-#' @param pin_path path to the Protein Interaction Network (PIN) file used in
-#'   the analysis
-#' @param input_genes vector of input gene symbols (that were used during active subnetwork genes)
-#' @param adj_method correction method to be used for adjusting p-values of
-#'  pathway enrichment results (Default: 'bonferroni', see ?p.adjust)
-#' @param enrichment_threshold threshold used when filtering individual iterations' pathway
-#'  enrichment results
+#' @inheritParams enrichment
+#' @inheritParams return_pin_path
 #' @param list_active_snw_genes boolean value indicating whether or not to report
-#' the non-DEG active subnetwork genes for the active subnetwork which was enriched for
-#' the given pathway with the lowest p value (default = FALSE)
-#'
+#' the non-significant active subnetwork genes for the active subnetwork which was enriched for
+#' the given term with the lowest p value (default = \code{FALSE})
 #'
 #' @return a dataframe of combined enrichment results. Columns are: \describe{
-#'   \item{ID}{KEGG ID of the enriched pathway}
-#'   \item{Pathway}{Description of the enriched pathway}
-#'   \item{Fold_Enrichment}{Fold enrichment value for the enriched pathway}
+#'   \item{ID}{ID of the enriched term}
+#'   \item{Term_Description}{Description of the enriched term}
+#'   \item{Fold_Enrichment}{Fold enrichment value for the enriched term}
 #'   \item{p_value}{p value of enrichment}
 #'   \item{adj_p}{adjusted p value of enrichment}
-#'   \item{non_DEG_Active_Snw_Genes (OPTIONAL)}{the non-DEG active subnetwork genes, comma-separated}
+#'   \item{non_Signif_Snw_Genes (OPTIONAL)}{the non-significant active subnetwork genes, comma-separated}
 #' }
 #'
 #' @export
@@ -150,53 +203,56 @@ enrichment <- function(genes_by_pathway, genes_of_interest,
 #' @seealso \code{\link{enrichment}} for the enrichment analysis for a single gene set
 #'
 #' @examples
-#' \dontrun{
-#' enr_res <- enrichment_analyses(snws, input_genes = my_input$GENE,
-#' gene_sets = "KEGG", pin_path = "path/to/PIN")
-#' }
-#'
-enrichment_analyses <- function(snws, input_genes,
-                                gene_sets = "KEGG", custom_genes = NULL, custom_pathways = NULL,
-                                pin_path,
-                                adj_method = "bonferroni", enrichment_threshold = 5e-2,
+#' enr_res <- enrichment_analyses(snws = example_active_snws[1:2],
+#'                                sig_genes_vec = RA_input$Gene.symbol[1:25],
+#'                                pin_name_path = "KEGG")
+enrichment_analyses <- function(snws,
+                                sig_genes_vec,
+                                pin_name_path = "Biogrid",
+                                genes_by_term = pathfindR::kegg_genes,
+                                term_descriptions = pathfindR::kegg_descriptions,
+                                adj_method = "bonferroni",
+                                enrichment_threshold = 0.05,
                                 list_active_snw_genes = FALSE) {
-  ############ Load Gene Set Data
-  gene_sets_df <- data.frame("Gene Set Name" = c("KEGG", "Reactome", "BioCarta",
-                                                 "GO-All", "GO-BP", "GO-CC", "GO-MF"),
-                             "genes_by_pathway" = c("kegg_genes", "reactome_genes", "biocarta_genes",
-                                                    "go_all_genes", "go_bp_genes", "go_cc_genes", "go_mf_genes"),
-                             "pathways_list" = c("kegg_pathways", "reactome_pathways", "biocarta_pathways",
-                                                 "go_all_pathways", "go_bp_pathways", "go_cc_pathways", "go_mf_pathways"))
 
-  if (gene_sets %in% gene_sets_df$Gene.Set.Name) {
-    idx <- which(gene_sets_df$Gene.Set.Name == gene_sets)
-    genes_name <- gene_sets_df$genes_by_pathway[idx]
-    pws_name <-  gene_sets_df$pathways_list[idx]
-
-    genes_by_pathway <- base::eval(parse(text = paste0("pathfindR::", genes_name)))
-    pathways_list <- base::eval(parse(text = paste0("pathfindR::", pws_name)))
-
-  } else if (gene_sets == "Custom") {
-    genes_by_pathway <- custom_genes
-    pathways_list <- custom_pathways
+  ### Argument check
+  if (!is.logical(list_active_snw_genes)) {
+    stop("`list_active_snw_genes` should be either TRUE or FALSE")
   }
+
+  ### Load PIN Data
+  pin_path <- return_pin_path(pin_name_path)
+  pin <- utils::read.delim(file = pin_path, header = FALSE,
+                           stringsAsFactors = FALSE)
+
+  background_genes <- unique(c(pin[, 1], pin[, 3]))
+
+  # turn all to upper case for best match
+  genes_by_term <- lapply(genes_by_term, base::toupper)
+  sig_genes_vec <- base::toupper(sig_genes_vec)
+  background_genes <- base::toupper(background_genes)
 
   ############ Enrichment per subnetwork
   enrichment_res <- lapply(snws, function(x)
-    pathfindR::enrichment(genes_by_pathway, x, pathways_list,
-                          adj_method, enrichment_threshold,
-                          pin_path, DEG_vec = input_genes))
+    pathfindR::enrichment(input_genes = base::toupper(x),
+                          genes_by_term = genes_by_term,
+                          term_descriptions = term_descriptions,
+                          adj_method = adj_method,
+                          enrichment_threshold = enrichment_threshold,
+                          sig_genes_vec = sig_genes_vec,
+                          background_genes = background_genes))
 
   ############ Combine Enrichments Results for All Subnetworks
   enrichment_res <- Reduce(rbind, enrichment_res)
 
   ############ Process if non-empty
   if (!is.null(enrichment_res)) {
-    ## delete non_DEG_Active_Snw_Genes if list_active_snw_genes == FALSE
-    if (!list_active_snw_genes)
-      enrichment_res$non_DEG_Active_Snw_Genes <- NULL
+    ## delete non_Signif_Snw_Genes if list_active_snw_genes == FALSE
+    if (!list_active_snw_genes) {
+      enrichment_res$non_Signif_Snw_Genes <- NULL
+    }
 
-    ## keep lowest p for each pathway
+    ## keep lowest p for each term
     idx <- order(enrichment_res$adj_p)
     enrichment_res <- enrichment_res[idx, ]
     enrichment_res <- enrichment_res[!duplicated(enrichment_res$ID), ]
@@ -208,25 +264,23 @@ enrichment_analyses <- function(snws, input_genes,
 #' Summarize Enrichment Results
 #'
 #' @param enrichment_res a dataframe of combined enrichment results. Columns are: \describe{
-#'   \item{ID}{KEGG ID of the enriched pathway}
-#'   \item{Pathway}{Description of the enriched pathway}
-#'   \item{Fold_Enrichment}{Fold enrichment value for the enriched pathway}
+#'   \item{ID}{ID of the enriched term}
+#'   \item{Term_Description}{Description of the enriched term}
+#'   \item{Fold_Enrichment}{Fold enrichment value for the enriched term}
 #'   \item{p_value}{p value of enrichment}
 #'   \item{adj_p}{adjusted p value of enrichment}
-#'   \item{non_DEG_Active_Snw_Genes (OPTIONAL)}{the non-DEG active subnetwork genes, comma-separated}
+#'   \item{non_Signif_Snw_Genes (OPTIONAL)}{the non-significant active subnetwork genes, comma-separated}
 #' }
-#' @param list_active_snw_genes boolean value indicating whether or not to report
-#' the non-DEG active subnetwork genes for the active subnetwork which was enriched for
-#' the given pathway with the lowest p value (default = FALSE)
+#' @inheritParams enrichment_analyses
 #'
 #' @return a dataframe of summarized enrichment results (over multiple iterations). Columns are: \describe{
-#'   \item{ID}{KEGG ID of the enriched pathway}
-#'   \item{Pathway}{Description of the enriched pathway}
-#'   \item{Fold_Enrichment}{Fold enrichment value for the enriched pathway}
-#'   \item{occurrence}{the number of iterations that the given pathway was found to enriched over all iterations}
-#'   \item{lowest_p}{the lowest adjusted-p value of the given pathway over all iterations}
-#'   \item{highest_p}{the highest adjusted-p value of the given pathway over all iterations}
-#'   \item{non_DEG_Active_Snw_Genes (OPTIONAL)}{the non-DEG active subnetwork genes, comma-separated}
+#'   \item{ID}{ID of the enriched term}
+#'   \item{Term_Description}{Description of the enriched term}
+#'   \item{Fold_Enrichment}{Fold enrichment value for the enriched term}
+#'   \item{occurrence}{the number of iterations that the given term was found to enriched over all iterations}
+#'   \item{lowest_p}{the lowest adjusted-p value of the given term over all iterations}
+#'   \item{highest_p}{the highest adjusted-p value of the given term over all iterations}
+#'   \item{non_Signif_Snw_Genes (OPTIONAL)}{the non-significant active subnetwork genes, comma-separated}
 #' }
 #' @export
 #'
@@ -234,7 +288,31 @@ enrichment_analyses <- function(snws, input_genes,
 #' \dontrun{
 #' summarize_enrichment_results(enrichment_res)
 #' }
-summarize_enrichment_results <- function(enrichment_res, list_active_snw_genes = FALSE) {
+summarize_enrichment_results <- function(enrichment_res,
+                                         list_active_snw_genes = FALSE) {
+  ## Argument checks
+  if(!is.logical(list_active_snw_genes)) {
+    stop("`list_active_snw_genes` should be either TRUE or FALSE")
+  }
+
+  nec_cols <- c("ID", "Term_Description", "Fold_Enrichment", "p_value", "adj_p")
+  if (list_active_snw_genes) {
+    nec_cols <- c(nec_cols, "non_Signif_Snw_Genes")
+  }
+
+  if (!is.data.frame(enrichment_res)) {
+    stop("`enrichment_res` should be a data frame")
+  }
+
+  if (ncol(enrichment_res) != length(nec_cols)) {
+    stop("`enrichment_res` should have exactly ", length(nec_cols), " columns")
+  }
+
+  if (!all(nec_cols == colnames(enrichment_res))) {
+    stop("`enrichment_res` should have column names ",
+         paste(dQuote(nec_cols), collapse = ", "))
+  }
+
   ## Annotate lowest p, highest p and occurrence
   final_res <- enrichment_res
   lowest_p <- tapply(enrichment_res$adj_p, enrichment_res$ID, min)
@@ -251,9 +329,11 @@ summarize_enrichment_results <- function(enrichment_res, list_active_snw_genes =
   final_res$occurrence <- as.numeric(occurrence[matched_idx])
 
   ## reorder columns
-  keep <- c("ID", "Pathway", "Fold_Enrichment", "occurrence", "lowest_p", "highest_p")
-  if (list_active_snw_genes)
-    keep <- c(keep, "non_DEG_Active_Snw_Genes")
+  keep <- c("ID", "Term_Description", "Fold_Enrichment",
+            "occurrence", "lowest_p", "highest_p")
+  if (list_active_snw_genes) {
+    keep <- c(keep, "non_Signif_Snw_Genes")
+  }
   final_res <- final_res[, keep]
 
   ## keep data with lowest p-value over all iterations

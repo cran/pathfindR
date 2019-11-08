@@ -4,28 +4,31 @@
 \name{RA_output}
 \alias{RA_output}
 \title{Example Output for the pathfindR Enrichment Workflow - Rheumatoid Arthritis}
-\format{A data frame with 79 rows and 8 columns:
+\format{A data frame with 95 rows and 8 columns:
 \describe{
-  \item{ID}{KEGG ID of the enriched pathway}
-  \item{Pathway}{Description of the enriched pathway}
-  \item{Fold_Enrichment}{Fold enrichment value for the enriched pathway}
-  \item{occurrence}{the number of iterations that the given pathway was found to enriched over all iterations}
-  \item{lowest_p}{the lowest adjusted-p value of the given pathway over all iterations}
-  \item{highest_p}{the highest adjusted-p value of the given pathway over all iterations}
-  \item{Up_regulated}{the up-regulated genes in the input involved in the given pathway, comma-separated}
-  \item{Down_regulated}{the down-regulated genes in the input involved in the given pathway, comma-separated}
+  \item{ID}{ID of the enriched term}
+  \item{Term_Description}{Description of the enriched term}
+  \item{Fold_Enrichment}{Fold enrichment value for the enriched term}
+  \item{occurrence}{the number of iterations that the given term was found to enriched over all iterations}
+  \item{lowest_p}{the lowest adjusted-p value of the given term over all iterations}
+  \item{highest_p}{the highest adjusted-p value of the given term over all iterations}
+  \item{Up_regulated}{the up-regulated genes in the input involved in the given term, comma-separated}
+  \item{Down_regulated}{the down-regulated genes in the input involved in the given term, comma-separated}
 }}
 \usage{
 RA_output
 }
 \description{
-A dataset containing the results of pathfindR's active-subnetwork-oriented
-pathway enrichment workflow performed on the rheumatoid arthritis
-differential-expression result dataset \code{RA_input}. Active subnetwork
-search was performed with Greedy Algorithm using the Biogrid PIN.
+The data frame containing the results of pathfindR's active-subnetwork-oriented
+enrichment workflow performed on the rheumatoid arthritis
+differential-expression data frame \code{\link{RA_input}}. Analysis via
+\code{run_pathfindR} was performed using the default settings.
+\emph{Generated on Nov 1, 2019.}
 }
 \seealso{
-\code{\link{RA_input}} for example input of the enrichment workflow.
-\code{\link{RA_clustered}} for example output of the clustering workflow.
+\code{\link{RA_input}}  for the RA differentially-expressed genes data frame
+\code{\link{RA_clustered}} for the RA example pathfindR clustering output
+\code{\link{RA_exp_mat}} for the RA differentially-expressed genes expression matrix
+\code{\link{run_pathfindR}} for details on the pathfindR enrichment analysis
 }
 \keyword{datasets}

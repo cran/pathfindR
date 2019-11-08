@@ -9,6 +9,8 @@
 custom_result
 }
 \description{
-A data frame consisting of pathfindR enrichment results on the example TF target data.
+A data frame consisting of pathfindR enrichment analysis results on the
+example TF target genes data (target gene sets of CREB and MYC).
+\emph{Generated on Oct 22, 2019.}
 }
 \keyword{datasets}

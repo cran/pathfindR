@@ -4,30 +4,29 @@
 \alias{return_pin_path}
 \title{Return The Path to Given Protein-Protein Interaction Network (PIN)}
 \usage{
-return_pin_path(pin_name_path = "Biogrid", org_dir = NULL)
+return_pin_path(pin_name_path = "Biogrid")
 }
 \arguments{
 \item{pin_name_path}{Name of the chosen PIN or path/to/PIN.sif. If PIN name,
-must be one of c("Biogrid", "GeneMania", "IntAct", "KEGG"). If
-path/to/PIN.sif, the file must comply with the PIN specifications. Defaults
-to "Biogrid".}
-
-\item{org_dir}{path/to/original/directory, supplied by run_pathfindR (default = NULL)}
+must be one of c("Biogrid", "STRING", "GeneMania", "IntAct", "KEGG", "mmu_STRING"). If
+path/to/PIN.sif, the file must comply with the PIN specifications. (Default = "Biogrid")}
 }
 \value{
-A character value that contains the path to chosen PIN.
+The absolute path to chosen PIN.
 }
 \description{
-This function returns the path/to/PIN.sif. While the default PINs are
-Biogrid, GeneMania, IntAct and KEGG, the user can choose to use any other PIN
-by specifying the path/to/PIN.sif. All PINs to be used in this workflow must
-have 3 columns with no header and be tab-separated. Columns 1 and 3 must be
-interacting proteins' HGNC gene symbols, column 2 must be a column with all
+This function returns the absolute path/to/PIN.sif. While the default PINs are
+"Biogrid", "STRING", "GeneMania", "IntAct", "KEGG" and "mmu_STRING". The user can also
+use any other PIN by specifying the "path/to/PIN.sif". All PINs to be used
+in this package must formatted as SIF files: i.e. have 3 columns with no
+header, no row names and be tab-separated. Columns 1 and 3 must be
+interactors' gene symbols, column 2 must be a column with all
 rows consisting of "pp".
 }
 \examples{
-pin_path <- return_pin_path("Biogrid")
-pin_path <- return_pin_path("KEGG")
+\dontrun{
+pin_path <- return_pin_path("GeneMania")
+}
 }
 \seealso{
 See \code{\link{run_pathfindR}} for the wrapper function of the
