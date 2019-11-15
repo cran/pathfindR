@@ -243,6 +243,9 @@ visualize_term_interactions <- function(result_df, pin_name_path) {
 #'
 #' @param hsa_kegg_ids hsa KEGG ids of pathways to be colored and visualized
 #' @param input_processed input data processed via \code{\link{input_processing}}
+#' @param max_to_plot The number of hsa kegg pathways (from beginning
+#' until the \code{max_to_plot}th id) to visualize. If NULL, visualizes all
+#' (default = NULL)
 #' @inheritParams color_kegg_pathway
 #' @param key_gravity gravity value (character) for the color key legend placement
 #' (see \code{\link[magick]{gravity_types}})
@@ -263,7 +266,7 @@ visualize_term_interactions <- function(result_df, pin_name_path) {
 #' \dontrun{
 #' visualize_hsa_KEGG(hsa_kegg_ids, input_processed)
 #' }
-visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed,
+visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed, max_to_plot = NULL,
                                normalize_vals = TRUE, node_cols = NULL,
                                quiet = TRUE,
                                key_gravity = "northeast",
@@ -287,6 +290,23 @@ visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed,
   if (!all(nec_cols %in% colnames(input_processed))) {
     stop("`input_processed` should contain the following columns: ",
          paste(dQuote(nec_cols), collapse = ", "))
+  }
+
+  ## max_to_plot
+  if (!is.null(max_to_plot)) {
+    if (!is.numeric(max_to_plot)) {
+      stop("`max_to_plot` should be numeric or NULL")
+    }
+
+    if (max_to_plot < 1) {
+      stop("`max_to_plot` should be >=1")
+    }
+  }
+
+
+  ## Select the first `max_to_plot` kegg ids
+  if (!is.null(max_to_plot)) {
+    hsa_kegg_ids <- hsa_kegg_ids[1:max_to_plot]
   }
 
   ############ Create change vector
@@ -331,6 +351,9 @@ visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed,
   cat("Saving colored pathway diagrams of", length(pw_vis_list), "KEGG pathways\n\n")
   pb <- utils::txtProgressBar(min = 0, max = length(pw_vis_list), style = 3)
   for (i in seq_len(length(pw_vis_list))) {
+
+    if (is.null(pw_vis_list[[i]])) next
+
     ### Read image
     f_path <- pw_vis_list[[i]]$file_path
     pw_diag <- magick::image_read(f_path)
@@ -471,24 +494,21 @@ color_kegg_pathway <- function(pw_id, change_vec, normalize_vals = TRUE,
   ############ and handling of non-input pathway genes
   ## download KGML to determine gene nodes
   pwKGML <- tempfile()
+  KGML_URL <- tryCatch({
+    KEGGgraph::retrieveKGML(sub("hsa", "", pw_id),
+                            organism = "hsa",
+                            destfile = pwKGML,
+                            quiet = quiet)
+  }, error = function(e) {
+    message(paste("Cannot download KGML file for:", pw_id))
+    message("Here's the original error message:")
+    message(e)
+    return(NA)
+  })
 
-  tryCatch({status <- KEGGgraph::retrieveKGML(sub("hsa", "", pw_id),
-                                              organism = "hsa",
-                                              destfile = pwKGML,
-                                              quiet = quiet)},
-           warning = function(w) {
-             message(paste("Warning for :", pw_id))
-             message("Here's the original warning message:")
-             message(w)
-             return(NULL)
-           }, error = function(e) {
-             message(paste("Cannot reach URL, please check your connection:", pw_id))
-             message("Here's the original error message:")
-             message(e)
-             return(NA)
-           }, finally = {
-             invisible(status)
-           })
+  if (is.na(KGML_URL) | is.na(file.info(pwKGML)$size)) {
+    return(NULL)
+  }
 
   current_pw <- KEGGgraph::parseKGML(pwKGML)
 
@@ -524,6 +544,9 @@ color_kegg_pathway <- function(pw_id, change_vec, normalize_vals = TRUE,
   }
 
   ############ Determine node colors
+  if (all(is.na(pw_vis_changes))) {
+    return(NULL)
+  }
   vals <- pw_vis_changes[!is.na(pw_vis_changes)]
   ### Normalization
   if (!all(vals == 1e6) & normalize_vals) {
@@ -572,22 +595,21 @@ color_kegg_pathway <- function(pw_id, change_vec, normalize_vals = TRUE,
                                                fg.color.list = fg_cols,
                                                bg.color.list = bg_cols)
 
-  tryCatch({status <- utils::download.file(url = pw_url,
-                                           destfile = f_path,
-                                           quiet = quiet)},
-           warning = function(w) {
-             message(paste("URL caused a warning:", url))
-             message("Here's the original warning message:")
-             message(w)
-             return(NULL)
-           }, error = function(e) {
-             message(paste("Cannot reach URL, please check your connection:", url))
-             message("Here's the original error message:")
-             message(e)
-             return(NA)
-           }, finally = {
-             invisible(status)
-           })
+  dl_stat <- tryCatch({
+    cond <- utils::download.file(url = pw_url,
+                                 destfile = f_path,
+                                 quiet = quiet)
+    cond
+  }, error = function(e) {
+    message(paste("Cannot download PNG file:", pw_url))
+    message("Here's the original error message:")
+    message(e)
+    return(NA)
+  })
+
+  if (is.na(dl_stat)) {
+    return(NULL)
+  }
 
   return(list(file_path = f_path,
               all_key_cols = all_key_cols,

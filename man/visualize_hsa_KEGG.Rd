@@ -4,14 +4,25 @@
 \alias{visualize_hsa_KEGG}
 \title{Visualize Human KEGG Pathways}
 \usage{
-visualize_hsa_KEGG(hsa_kegg_ids, input_processed, normalize_vals = TRUE,
-  node_cols = NULL, quiet = TRUE, key_gravity = "northeast",
-  logo_gravity = "southeast")
+visualize_hsa_KEGG(
+  hsa_kegg_ids,
+  input_processed,
+  max_to_plot = NULL,
+  normalize_vals = TRUE,
+  node_cols = NULL,
+  quiet = TRUE,
+  key_gravity = "northeast",
+  logo_gravity = "southeast"
+)
 }
 \arguments{
 \item{hsa_kegg_ids}{hsa KEGG ids of pathways to be colored and visualized}
 
 \item{input_processed}{input data processed via \code{\link{input_processing}}}
+
+\item{max_to_plot}{The number of hsa kegg pathways (from beginning
+until the \code{max_to_plot}th id) to visualize. If NULL, visualizes all
+(default = NULL)}
 
 \item{normalize_vals}{should change values be normalized (default = \code{TRUE})}
 

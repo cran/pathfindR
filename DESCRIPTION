@@ -1,8 +1,15 @@
 Package: pathfindR
 Type: Package
 Title: Enrichment Analysis Utilizing Active Subnetworks
-Version: 1.4.0
-Author: Ege Ulgen, Ozan Ozisik
+Version: 1.4.1
+Authors@R: c(person("Ege", "Ulgen",
+                    role = "cre", 
+                    email = "egeulgen@gmail.com",
+                    comment = c(ORCID = "0000-0003-2090-3621")),
+             person("Ozan", "Ozisik",
+                    role = "aut",
+                    email = "ozanytu@gmail.com",
+                    comment = c(ORCID = "0000-0001-5980-8002")))
 Maintainer: Ege Ulgen <egeulgen@gmail.com>
 Description: Enrichment analysis enables researchers to uncover mechanisms 
     underlying a phenotype. However, conventional methods for enrichment 
@@ -25,16 +32,18 @@ URL: https://github.com/egeulgen/pathfindR
 BugReports: https://github.com/egeulgen/pathfindR/issues
 Encoding: UTF-8
 LazyData: true
-SystemRequirements: Java JVM 1.8
+SystemRequirements: Java (>= 8.0)
 biocViews:
 Imports: DBI, AnnotationDbi, doParallel, foreach, rmarkdown,
         org.Hs.eg.db, ggplot2, ggraph, fpc, grDevices, igraph, R.utils,
         magick, KEGGREST, KEGGgraph, knitr
 Depends: R (>= 3.6)
 Suggests: testthat (>= 2.1.0), covr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2019-11-08 07:35:04 UTC; egeulgen
+Packaged: 2019-11-15 01:15:28 UTC; egeulgen
+Author: Ege Ulgen [cre] (<https://orcid.org/0000-0003-2090-3621>),
+  Ozan Ozisik [aut] (<https://orcid.org/0000-0001-5980-8002>)
 Repository: CRAN
-Date/Publication: 2019-11-08 11:40:02 UTC
+Date/Publication: 2019-11-15 11:10:06 UTC

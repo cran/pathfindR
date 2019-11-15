@@ -4,19 +4,43 @@
 \alias{run_pathfindR}
 \title{Wrapper Function for pathfindR - Active-Subnetwork-Oriented Enrichment Analysis}
 \usage{
-run_pathfindR(input, gene_sets = "KEGG", min_gset_size = 10,
-  max_gset_size = 300, custom_genes = NULL,
-  custom_descriptions = NULL, pin_name_path = "Biogrid",
-  p_val_threshold = 0.05, visualize_enriched_terms = TRUE,
-  convert2alias = TRUE, enrichment_threshold = 0.05,
-  adj_method = "bonferroni", search_method = "GR",
-  use_all_positives = FALSE, saTemp0 = 1, saTemp1 = 0.01,
-  saIter = 10000, gaPop = 400, gaIter = 200, gaThread = 5,
-  gaCrossover = 1, gaMut = 0, grMaxDepth = 1, grSearchDepth = 1,
-  grOverlap = 0.5, grSubNum = 1000, iterations = 10,
-  n_processes = NULL, score_quan_thr = 0.8, sig_gene_thr = 0.02,
-  plot_enrichment_chart = TRUE, output_dir = "pathfindR_Results",
-  list_active_snw_genes = FALSE, silent_option = TRUE)
+run_pathfindR(
+  input,
+  gene_sets = "KEGG",
+  min_gset_size = 10,
+  max_gset_size = 300,
+  custom_genes = NULL,
+  custom_descriptions = NULL,
+  pin_name_path = "Biogrid",
+  p_val_threshold = 0.05,
+  visualize_enriched_terms = TRUE,
+  max_to_plot = 10,
+  convert2alias = TRUE,
+  enrichment_threshold = 0.05,
+  adj_method = "bonferroni",
+  search_method = "GR",
+  use_all_positives = FALSE,
+  saTemp0 = 1,
+  saTemp1 = 0.01,
+  saIter = 10000,
+  gaPop = 400,
+  gaIter = 200,
+  gaThread = 5,
+  gaCrossover = 1,
+  gaMut = 0,
+  grMaxDepth = 1,
+  grSearchDepth = 1,
+  grOverlap = 0.5,
+  grSubNum = 1000,
+  iterations = 10,
+  n_processes = NULL,
+  score_quan_thr = 0.8,
+  sig_gene_thr = 0.02,
+  plot_enrichment_chart = TRUE,
+  output_dir = "pathfindR_Results",
+  list_active_snw_genes = FALSE,
+  silent_option = TRUE
+)
 }
 \arguments{
 \item{input}{the input data that pathfindR uses. The input must be a data
@@ -53,6 +77,10 @@ the input data frame. Must a numeric value between 0 and 1. (default = 0.05)}
 
 \item{visualize_enriched_terms}{Boolean value to indicate whether or not to
 create diagrams for enriched terms (default = TRUE)}
+
+\item{max_to_plot}{(necessary only if \code{gene_sets = "KEGG"} and
+\code{visualize_enriched_terms = TRUE}) The number of top hsa kegg pathways
+to visualize. If \code{NULL}, visualizes all (default = 10)}
 
 \item{convert2alias}{boolean to indicate whether or not to convert gene symbols
 in the input that are not found in the PIN to an alias symbol found in the PIN

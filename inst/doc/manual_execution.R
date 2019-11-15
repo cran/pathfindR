@@ -1,19 +1,19 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>")
 
-## ----init_steps----------------------------------------------------------
+## ----init_steps---------------------------------------------------------------
 suppressPackageStartupMessages(library(pathfindR))
 data(RA_input)
 head(RA_input, 3)
 
-## ----process-------------------------------------------------------------
+## ----process------------------------------------------------------------------
 RA_processed <- input_processing(input = RA_input, # the input: in this case, differential expression results
                                  p_val_threshold = 0.05, # p value threshold to filter significant genes
                                  pin_name_path  = "Biogrid", # the name of the PIN to use for active subnetwork search
                                  convert2alias = TRUE) # boolean indicating whether or not to convert missing symbols to alias symbols in the PIN
 
-## ----gene_set------------------------------------------------------------
+## ----gene_set-----------------------------------------------------------------
 # using "BioCarta" as our gene sets for enrichment
 biocarta_list <- fetch_gene_set(gene_sets = "BioCarta",
                                 min_gset_size = 10,
@@ -21,7 +21,7 @@ biocarta_list <- fetch_gene_set(gene_sets = "BioCarta",
 biocarta_gsets <- biocarta_list[[1]]
 biocarta_descriptions <- biocarta_list[[2]]
 
-## ----snw_search, eval=FALSE----------------------------------------------
+## ----snw_search, eval=FALSE---------------------------------------------------
 #  n_iter <- 15 ## number of iterations
 #  combined_res <- NULL ## to store the result of each iteration
 #  
@@ -50,7 +50,7 @@ biocarta_descriptions <- biocarta_list[[2]]
 #    combined_res <- rbind(combined_res, current_res)
 #  }
 
-## ----post_proc, eval=FALSE-----------------------------------------------
+## ----post_proc, eval=FALSE----------------------------------------------------
 #  ###### Summarize Combined Enrichment Results
 #  summarized_df <- summarize_enrichment_results(combined_res,
 #                                                list_active_snw_genes = TRUE)
@@ -60,11 +60,11 @@ biocarta_descriptions <- biocarta_list[[2]]
 #                                   input_processed = RA_processed,
 #                                   genes_by_term = biocarta_gsets)
 
-## ----vis_pws, eval=FALSE-------------------------------------------------
+## ----vis_pws, eval=FALSE------------------------------------------------------
 #  visualize_terms(result_df = final_res,
 #                  hsa_KEGG = FALSE, # boolean to indicate whether human KEGG gene sets were used for enrichment analysis or not
 #                  pin_name_path = "Biogrid")
 
-## ----enr_chart, eval=FALSE-----------------------------------------------
+## ----enr_chart, eval=FALSE----------------------------------------------------
 #  enrichment_chart(final_res[1:10, ])
 

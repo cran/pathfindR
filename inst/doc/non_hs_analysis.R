@@ -1,10 +1,10 @@
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>",
                       fig.width = 7, fig.height = 7, fig.align = "center")
 suppressPackageStartupMessages(library(pathfindR))
 
-## ----KEGG, eval=FALSE----------------------------------------------------
+## ----KEGG, eval=FALSE---------------------------------------------------------
 #  library(KEGGREST)
 #  #### Obtain list of M.musculus pathways
 #  mmu_kegg_descriptions <- keggList("pathway", "mmu")
@@ -29,15 +29,15 @@ suppressPackageStartupMessages(library(pathfindR))
 #  mmu_kegg_genes <- mmu_kegg_genes[sapply(mmu_kegg_genes, length) != 0]
 #  mmu_kegg_descriptions <- mmu_kegg_descriptions[names(mmu_kegg_descriptions) %in% names(mmu_kegg_genes)]
 
-## ----KEGG_save, eval=FALSE-----------------------------------------------
+## ----KEGG_save, eval=FALSE----------------------------------------------------
 #  ## Save both as RDS files for later use
 #  saveRDS(mmu_kegg_genes, "mmu_kegg_genes.RDS")
 #  saveRDS(mmu_kegg_descriptions, "mmu_kegg_descriptions.RDS")
 
-## ----KEGG_load, eval=FALSE-----------------------------------------------
+## ----KEGG_load, eval=FALSE----------------------------------------------------
 #  mmu_kegg_genes <- readRDS("mmu_kegg_genes.RDS")
 
-## ----process_PIN1, eval=FALSE--------------------------------------------
+## ----process_PIN1, eval=FALSE-------------------------------------------------
 #  ## Downloading the STRING PIN file to tempdir
 #  url <- "https://stringdb-static.org/download/protein.links.v11.0/10090.protein.links.v11.0.txt.gz"
 #  path2file <- file.path(tempdir(check = TRUE), "STRING.txt.gz")
@@ -54,7 +54,7 @@ suppressPackageStartupMessages(library(pathfindR))
 #                               Interactor_B = sub("^10090\\.", "", mmu_string_df$protein2))
 #  head(mmu_string_pin, 2)
 
-## ----process_PIN2, eval=FALSE--------------------------------------------
+## ----process_PIN2, eval=FALSE-------------------------------------------------
 #  library(biomaRt)
 #  mmu_ensembl <- useMart("ensembl", dataset = "mmusculus_gene_ensembl")
 #  converted <- getBM(attributes = c("ensembl_peptide_id", "mgi_symbol"),
@@ -68,7 +68,7 @@ suppressPackageStartupMessages(library(pathfindR))
 #  
 #  head(mmu_string_pin, 2)
 
-## ----process_PIN3, eval=FALSE--------------------------------------------
+## ----process_PIN3, eval=FALSE-------------------------------------------------
 #  # remove self interactions
 #  self_intr_cond <- mmu_string_pin$Interactor_A == mmu_string_pin$Interactor_B
 #  mmu_string_pin <- mmu_string_pin[!self_intr_cond, ]
@@ -80,7 +80,7 @@ suppressPackageStartupMessages(library(pathfindR))
 #                               pp = "pp",
 #                               B = mmu_string_pin[, 2])
 
-## ----process_PIN4, eval=FALSE--------------------------------------------
+## ----process_PIN4, eval=FALSE-------------------------------------------------
 #  path2SIF <- file.path(tempdir(), "mmusculusPIN.sif")
 #  write.table(mmu_string_pin,
 #              file = path2SIF,
@@ -89,10 +89,10 @@ suppressPackageStartupMessages(library(pathfindR))
 #              sep = "\t")
 #  path2SIF <- normalizePath(path2SIF)
 
-## ----mmu_input_df--------------------------------------------------------
+## ----mmu_input_df-------------------------------------------------------------
 knitr::kable(head(myeloma_input))
 
-## ----run, eval=FALSE-----------------------------------------------------
+## ----run, eval=FALSE----------------------------------------------------------
 #  myeloma_output <- run_pathfindR(input = myeloma_input,
 #                                  convert2alias = FALSE,
 #                                  gene_sets = "Custom",
@@ -100,13 +100,13 @@ knitr::kable(head(myeloma_input))
 #                                  custom_descriptions = mmu_kegg_descriptions,
 #                                  pin_name_path = path2SIF)
 
-## ----enr_chart, echo=FALSE-----------------------------------------------
+## ----enr_chart, echo=FALSE----------------------------------------------------
 enrichment_chart(myeloma_output)
 
-## ----output--------------------------------------------------------------
+## ----output-------------------------------------------------------------------
 knitr::kable(myeloma_output)
 
-## ----run2, eval=FALSE----------------------------------------------------
+## ----run2, eval=FALSE---------------------------------------------------------
 #  myeloma_output <- run_pathfindR(input = myeloma_input,
 #                                  convert2alias = FALSE,
 #                                  gene_sets = "mmu_KEGG",

@@ -25,6 +25,9 @@
 #'  automatically (Default == NULL. Gets set to 1 for Genetic Algorithm)
 #' @param visualize_enriched_terms Boolean value to indicate whether or not to
 #'  create diagrams for enriched terms (default = TRUE)
+#' @param max_to_plot (necessary only if \code{gene_sets = "KEGG"} and
+#' \code{visualize_enriched_terms = TRUE}) The number of top hsa kegg pathways
+#' to visualize. If \code{NULL}, visualizes all (default = 10)
 #' @param plot_enrichment_chart boolean value. If TRUE, a bubble chart displaying the enrichment
 #' results is plotted. (default = TRUE)
 #' @param output_dir the directory to be created where the output and intermediate files are saved (default = "pathfindR_Results")
@@ -87,6 +90,7 @@ run_pathfindR <- function(input,
                           pin_name_path = "Biogrid",
                           p_val_threshold = 5e-2,
                           visualize_enriched_terms = TRUE,
+                          max_to_plot = 10,
                           convert2alias = TRUE,
                           enrichment_threshold = 5e-2,
                           adj_method = "bonferroni",
@@ -296,10 +300,20 @@ run_pathfindR <- function(input,
   ##### Visualize the Enriched Terms (If human KEGG, KEGG diagram. Otherwise,
   # Interactions of Genes in the PIN)
   if (visualize_enriched_terms) {
-    pathfindR::visualize_terms(result_df = final_res,
-                               input_processed = input_processed,
-                               hsa_KEGG = (gene_sets == "KEGG"),
-                               pin_name_path = pin_name_path)
+    if ((gene_sets == "KEGG")) {
+      pathfindR::visualize_terms(result_df = final_res,
+                                 input_processed = input_processed,
+                                 hsa_KEGG = TRUE,
+                                 pin_name_path = pin_name_path,
+                                 max_to_plot = max_to_plot)
+      message("By default, the top 10 KEGG pathways are visualized\n",
+      "Please use `visualize_terms()` if you'd like to plot all enriched pathways")
+    } else {
+      pathfindR::visualize_terms(result_df = final_res,
+                                 input_processed = input_processed,
+                                 hsa_KEGG = FALSE,
+                                 pin_name_path = pin_name_path)
+    }
   }
 
   ############ Create HTML Report

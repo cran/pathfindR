@@ -11,6 +11,9 @@ Front. Genet. doi:10.3389/fgene.2019.00858
 
 ##############################################################################"
   )
+
+  ### Check Java version
+  check_java_version()
 }
 
 #' pathfindR: A package for Enrichment Analysis Utilizing Active Subnetworks
