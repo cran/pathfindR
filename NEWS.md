@@ -1,3 +1,9 @@
+# pathfindR 1.4.2
+
+## Minor changes and bug fixes
+- Fixed corner case in `create_kappa_matrix()` when `chance` is 1, the metric is turned into 0
+- Fixed misused `class(.) == *` in `cluster_graph_vis()`
+
 # pathfindR 1.4.1
 
 ## Major Changes

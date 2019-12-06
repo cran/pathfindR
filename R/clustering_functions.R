@@ -381,7 +381,7 @@ cluster_graph_vis <- function(clu_obj, kappa_mat, enrichment_res,
                 "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99",
                 "#B15928")
 
-  if (class(clu_obj) == "matrix") {
+  if (is.matrix(clu_obj)) {
     ### Argument checks
     if (!all(rownames(clu_obj) %in% colnames(kappa_mat))) {
       stop("Not all terms in `clu_obj` present in `kappa_mat`!")
@@ -444,7 +444,7 @@ cluster_graph_vis <- function(clu_obj, kappa_mat, enrichment_res,
                         vertex.label.cex = 0.7,
                         edge.width = igraph::E(g)$weight,
                         edge.arrow.mode = 0)
-  } else if (class(clu_obj) == "integer") {
+  } else if (is.integer(clu_obj)) {
     ### Argument checks
     if (!all(names(clu_obj) %in% colnames(kappa_mat))) {
       stop("Not all terms in `clu_obj` present in `kappa_mat`!")
@@ -552,6 +552,7 @@ cluster_enriched_terms <- function(enrichment_res,
   kappa_mat <- create_kappa_matrix(enrichment_res = enrichment_res,
                                    use_description = use_description,
                                    use_active_snw_genes = use_active_snw_genes)
+  kappa_mat[is.na(kappa_mat)] <- 0
 
   ### Cluster Terms
   if (method == "hierarchical") {
