@@ -1,43 +1,27 @@
 ## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>",
-                      fig.width = 7, fig.height = 7, fig.align = "center")
+                      fig.width = 7, fig.height = 7, fig.align = "center",
+                      eval = FALSE)
 suppressPackageStartupMessages(library(pathfindR))
 
-## ----KEGG, eval=FALSE---------------------------------------------------------
-#  library(KEGGREST)
-#  #### Obtain list of M.musculus pathways
-#  mmu_kegg_descriptions <- keggList("pathway", "mmu")
-#  
-#  # Shorten descriptions
-#  mmu_kegg_descriptions <- sub(" - Mus musculus \\(mouse\\)", "", mmu_kegg_descriptions)
-#  
-#  # Turn the identifiers into KEGG-style pathway identifiers (org_id#####)
-#  names(mmu_kegg_descriptions) <- sub("path:", "", names(mmu_kegg_descriptions))
-#  
-#  #### Obtain and parse genes per each pathway
-#  mmu_kegg_genes <- sapply(names(mmu_kegg_descriptions), function(pwid){
-#    pw <- keggGet(pwid)
-#    pw <- pw[[1]]$GENE[c(FALSE, TRUE)] # get gene symbols, not descriptions
-#    pw <- sub(";.+", "", pw) # discard any remaining description
-#    pw <- pw[grep("^[A-Za-z0-9_-]+(\\@)?$", pw)] # remove any mistaken lines that cannot be gene symbols
-#    pw <- unique(pw) # keep unique symbols
-#    return(pw)
-#  })
-#  
-#  #### Filter terms to exclude those with 0 genes (metabolic pathways)
-#  mmu_kegg_genes <- mmu_kegg_genes[sapply(mmu_kegg_genes, length) != 0]
-#  mmu_kegg_descriptions <- mmu_kegg_descriptions[names(mmu_kegg_descriptions) %in% names(mmu_kegg_genes)]
+## ----mmu_kegg-----------------------------------------------------------------
+#  gsets_list <- get_gene_sets_list(source = "KEGG",
+#                                   org_code = "mmu")
 
-## ----KEGG_save, eval=FALSE----------------------------------------------------
+## ----KEGG_save----------------------------------------------------------------
+#  mmu_kegg_genes <- gsets_list$gene_sets
+#  mmu_kegg_descriptions <- gsets_list$descriptions
+#  
 #  ## Save both as RDS files for later use
 #  saveRDS(mmu_kegg_genes, "mmu_kegg_genes.RDS")
 #  saveRDS(mmu_kegg_descriptions, "mmu_kegg_descriptions.RDS")
 
-## ----KEGG_load, eval=FALSE----------------------------------------------------
+## ----KEGG_load----------------------------------------------------------------
 #  mmu_kegg_genes <- readRDS("mmu_kegg_genes.RDS")
+#  mmu_kegg_descriptions <- readRDS("mmu_kegg_descriptions.RDS")
 
-## ----process_PIN1, eval=FALSE-------------------------------------------------
+## ----process_PIN1-------------------------------------------------------------
 #  ## Downloading the STRING PIN file to tempdir
 #  url <- "https://stringdb-static.org/download/protein.links.v11.0/10090.protein.links.v11.0.txt.gz"
 #  path2file <- file.path(tempdir(check = TRUE), "STRING.txt.gz")
@@ -54,9 +38,11 @@ suppressPackageStartupMessages(library(pathfindR))
 #                               Interactor_B = sub("^10090\\.", "", mmu_string_df$protein2))
 #  head(mmu_string_pin, 2)
 
-## ----process_PIN2, eval=FALSE-------------------------------------------------
+## ----process_PIN2-------------------------------------------------------------
 #  library(biomaRt)
+#  
 #  mmu_ensembl <- useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+#  
 #  converted <- getBM(attributes = c("ensembl_peptide_id", "mgi_symbol"),
 #                     filters = "ensembl_peptide_id",
 #                     values = unique(unlist(mmu_string_pin)),
@@ -68,7 +54,7 @@ suppressPackageStartupMessages(library(pathfindR))
 #  
 #  head(mmu_string_pin, 2)
 
-## ----process_PIN3, eval=FALSE-------------------------------------------------
+## ----process_PIN3-------------------------------------------------------------
 #  # remove self interactions
 #  self_intr_cond <- mmu_string_pin$Interactor_A == mmu_string_pin$Interactor_B
 #  mmu_string_pin <- mmu_string_pin[!self_intr_cond, ]
@@ -80,19 +66,20 @@ suppressPackageStartupMessages(library(pathfindR))
 #                               pp = "pp",
 #                               B = mmu_string_pin[, 2])
 
-## ----process_PIN4, eval=FALSE-------------------------------------------------
+## ----process_PIN4-------------------------------------------------------------
 #  path2SIF <- file.path(tempdir(), "mmusculusPIN.sif")
 #  write.table(mmu_string_pin,
 #              file = path2SIF,
 #              col.names = FALSE,
 #              row.names = FALSE,
-#              sep = "\t")
+#              sep = "\t",
+#              quote = FALSE)
 #  path2SIF <- normalizePath(path2SIF)
 
-## ----mmu_input_df-------------------------------------------------------------
+## ----mmu_input_df, eval=TRUE--------------------------------------------------
 knitr::kable(head(myeloma_input))
 
-## ----run, eval=FALSE----------------------------------------------------------
+## ----run----------------------------------------------------------------------
 #  myeloma_output <- run_pathfindR(input = myeloma_input,
 #                                  convert2alias = FALSE,
 #                                  gene_sets = "Custom",
@@ -100,13 +87,13 @@ knitr::kable(head(myeloma_input))
 #                                  custom_descriptions = mmu_kegg_descriptions,
 #                                  pin_name_path = path2SIF)
 
-## ----enr_chart, echo=FALSE----------------------------------------------------
+## ----enr_chart, echo=FALSE, eval=TRUE-----------------------------------------
 enrichment_chart(myeloma_output)
 
-## ----output-------------------------------------------------------------------
+## ----output, eval=TRUE--------------------------------------------------------
 knitr::kable(myeloma_output)
 
-## ----run2, eval=FALSE---------------------------------------------------------
+## ----run2---------------------------------------------------------------------
 #  myeloma_output <- run_pathfindR(input = myeloma_input,
 #                                  convert2alias = FALSE,
 #                                  gene_sets = "mmu_KEGG",

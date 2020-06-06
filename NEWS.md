@@ -1,8 +1,35 @@
+# pathfindR 1.5.0
+
+## Major Changes
+- created separate package `pathfindR.data` for storing pathfindR data
+- added the function `visualize_active_subnetworks()` for visualizing graphs of active subnetworks
+- add the new vignette "Comparing Two pathfindR Results" that briefly describes how different pathfindR results can be compared
+- added the functions `combine_pathfindR_results()` and `combined_results_graph()` for comparison of 2 pathfindR results and term-gene graph of the combined results, respectively
+- added the function `get_pin_file()` for obtaining organism-specific PIN data (only from BioGRID for now)
+- added the function `get_gene_sets_list()` for obtaining organism-specific gene sets list from KEGG, Reactome and MSigDB
+- added the function `term_gene_heatmap()` to create heatmap visualizations of enriched terms and the involved input genes. Rows are enriched terms and columns are involved input genes. If `genes_df` is provided, colors of the tiles indicate the change values
+- added the function `UpSet_plot()` to create UpSet plots of enriched terms
+- added the human cell markers gene sets data `cell_markers_gsets` and `cell_markers_descriptions`
+
+## Minor changes and bug fixes
+- fixed an issue regarding `parallel::makeCluster()` in `run_pathfindR()` (#45)
+- fixed save-related issue in `download_kegg_png()` (#37, @rix133)
+- added the output data `RA_comparison_output` of pathfindR results on another RA-related dataset (GSE84074)
+- in `visualize_hsa_KEGG()`, fixed the issue where >1 entrez ids were returned for a gene symbol (the first one is kept)
+- in `visualize_hsa_KEGG()`, implemented a tryCatch to avoid any issues when `KEGGREST::color.pathway.by.objects()` might fail (#28)
+- in `visualize_hsa_KEGG()`, now limiting the number of genes passes onto `KEGGREST::color.pathway.by.objects()` to < 60 (because the KEGG API now limits the number?)
+- changed default visualization in `term_gene_heatmap()` (i.e. when `genes_df` is not provided) to binary colored heatmap (by default, "green" and "red", controlled by `low` and `high`) by up-/down- regulation status
+- update the vignette "pathfindR Analysis for non-Homo-sapiens organisms" to reflect new data generation functions `get_pin_file()` and `get_gene_sets_list()` and fixed a minor issue in the vignette (#46)
+
+***
+
 # pathfindR 1.4.2
 
 ## Minor changes and bug fixes
 - Fixed corner case in `create_kappa_matrix()` when `chance` is 1, the metric is turned into 0
 - Fixed misused `class(.) == *` in `cluster_graph_vis()`
+
+***
 
 # pathfindR 1.4.1
 
@@ -11,9 +38,11 @@
 - The Java version is now checked
 
 ## Minor changes and bug fixes
-- Fixed behaviour: when no input genes are present in the enriched hsa KEGG pathway, visualization of the pathway is now skipped
+- Fixed behavior: when no input genes are present in the enriched hsa KEGG pathway, visualization of the pathway is now skipped
 - Added the argument `max_to_plot` to `visualize_hsa_KEGG()` and to `run_pathfindR()`. This argument controls the number of pathways to be visualized (default is NULL, i.e. no filter). This was implemented not to slow down the runtime of `run_pathfindR()` as downloading the png files is slow.
 - Fixed links to visualizations in `enriched_ters.Rmd`
+
+***
 
 # pathfindR 1.4.0
 
@@ -149,12 +178,12 @@
 # pathfindR 1.1
 
 ## Major changes
-- Added the `gene_sets` option in `run_pathfindR` to chose between different gene sets. Available gene sets are `KEGG`, `Reactome`, `BioCarta` and Gene Ontology gene sets (`GO-BP`, `GO-CC` and `GO-MF`).
-- `cluster_pathways` automatically recognizes the ID type and chooses the gene sets accordingly.
+- Added the `gene_sets` option in `run_pathfindR` to chose between different gene sets. Available gene sets are `KEGG`, `Reactome`, `BioCarta` and Gene Ontology gene sets (`GO-BP`, `GO-CC` and `GO-MF`)
+- `cluster_pathways` automatically recognizes the ID type and chooses the gene sets accordingly
 
 ## Minor changes and bug fixes
-- Fixed issue regarding p values < 1e-13. No active subnetworks were found when there were p values < 1e-13. These are now changed to 1e-13 in the function `input_processing`.
+- Fixed issue regarding p values < 1e-13. No active subnetworks were found when there were p values < 1e-13. These are now changed to 1e-13 in the function `input_processing`
 - In `input_processing`, genes for which no interactions are found in the PIN are now removed before active subnetwork search
-- Duplicated gene symbols no longer raise an error. If there are duplicated symbols, the lowest p value is chosen for each gene symbol in the function `input_processing`.
+- Duplicated gene symbols no longer raise an error. If there are duplicated symbols, the lowest p value is chosen for each gene symbol in the function `input_processing`
 - To prevent the formation of nested folders, by default and on errors, the function `run_pathfindR` returns to the user's working directory.
-- Citation information are now provided for our BioRxiv pre-print.
+- Citation information are now provided for our BioRxiv pre-print

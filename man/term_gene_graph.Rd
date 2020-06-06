@@ -2,12 +2,12 @@
 % Please edit documentation in R/visualization_functions.R
 \name{term_gene_graph}
 \alias{term_gene_graph}
-\title{Plot Term-Gene Graph}
+\title{Create Term-Gene Graph}
 \usage{
 term_gene_graph(
   result_df,
   num_terms = 10,
-  layout = "auto",
+  layout = "stress",
   use_description = FALSE,
   node_size = "num_genes"
 )
@@ -24,7 +24,7 @@ term_gene_graph(
 \item{num_terms}{Number of top enriched terms to use while creating the graph. Set to \code{NULL} to use
 all enriched terms (default = 10, i.e. top 10 terms)}
 
-\item{layout}{The type of layout to create (see \code{\link[ggraph]{ggraph}} for details. Default = "auto")}
+\item{layout}{The type of layout to create (see \code{\link[ggraph]{ggraph}} for details. Default = "stress")}
 
 \item{use_description}{Boolean argument to indicate whether term descriptions
 (in the "Term_Description" column) should be used. (default = \code{FALSE})}
@@ -41,7 +41,7 @@ a  \code{\link[ggraph]{ggraph}} object containing the term-gene graph.
  the -log10(lowest p value) (if \code{node_size = "p_val"}).
 }
 \description{
-Plot Term-Gene Graph
+Create Term-Gene Graph
 }
 \details{
 This function (adapted from the Gene-Concept network visualization

@@ -59,16 +59,15 @@ knitr::kable(head(RA_input))
 ## ----example_out, eval=TRUE---------------------------------------------------
 knitr::kable(head(RA_output, 2))
 
-## ----encrichment_plot, eval=TRUE, echo=FALSE----------------------------------
-enrichment_chart(RA_output)
-
-## ----encrichment_plot_shown, eval=FALSE---------------------------------------
+## ----encrichment_plot_shown---------------------------------------------------
 #  # change number of top terms plotted (default = 10)
 #  enrichment_chart(result_df = RA_output,
 #                   top_terms = 15)
 
+## ----hierarchical0------------------------------------------------------------
+#  RA_clustered <- cluster_enriched_terms(RA_output, plot_dend = FALSE, plot_clusters_graph = FALSE)
+
 ## ----hierarchical1, eval=TRUE-------------------------------------------------
-RA_clustered <- cluster_enriched_terms(RA_output, plot_dend = FALSE)
 ## First 2 rows of clustered data frame
 knitr::kable(head(RA_clustered, 2))
 ## The representative terms
@@ -79,20 +78,17 @@ knitr::kable(RA_clustered[RA_clustered$Status == "Representative", ])
 RA_selected <- subset(RA_clustered, Cluster %in% 5:7)
 enrichment_chart(RA_selected, plot_by_cluster = TRUE)
 
-## ----fuzzy, eval=TRUE, fig.height=4, fig.width=8------------------------------
-RA_clustered_fuzzy <- cluster_enriched_terms(RA_output, method = "fuzzy")
+## ----fuzzy--------------------------------------------------------------------
+#  RA_clustered_fuzzy <- cluster_enriched_terms(RA_output, method = "fuzzy")
 
-## ----term_gene1, eval=TRUE, fig.height=4, fig.width=8-------------------------
-term_gene_graph(RA_output)
+## ----hmap1--------------------------------------------------------------------
+#  term_gene_heatmap(result_df = RA_output, genes_df = RA_input)
 
-## ----term_gene2, eval=TRUE, fig.height=4, fig.width=8-------------------------
-term_gene_graph(RA_output, num_terms = NULL)
+## ----term_gene_graph----------------------------------------------------------
+#  term_gene_graph(result_df = RA_output, use_description = TRUE)
 
-## ----term_gene3, eval=TRUE, fig.height=4, fig.width=8-------------------------
-term_gene_graph(RA_output, num_terms = 3, use_description = TRUE)
-
-## ----term_gene4, eval=TRUE, fig.height=4, fig.width=8-------------------------
-term_gene_graph(RA_output, num_terms = 3, node_size = "p_val")
+## ----upset--------------------------------------------------------------------
+#  UpSet_plot(result_df = RA_output, genes_df = RA_input)
 
 ## ----scores, eval=TRUE, fig.height=4, fig.width=8-----------------------------
 ## Vector of "Case" IDs
@@ -114,6 +110,11 @@ score_matrix <- score_terms(enrichment_table = RA_clustered[RA_clustered$Status 
                             low = "#f7797d", # default = "green"
                             mid = "#fffde4", # default = "black"
                             high = "#1f4037") # default = "red"
+
+## ----compare2res, eval=TRUE, fig.height=4, fig.width=8------------------------
+combined_df <- combine_pathfindR_results(result_A = RA_output, 
+                                         result_B = RA_comparison_output, 
+                                         plot_common = FALSE)
 
 ## ----custom_prep, eval=TRUE---------------------------------------------------
 ## CREB target genes
@@ -156,6 +157,6 @@ knitr::kable(head(input_df))
 #  
 #  knitr::kable(custom_result)
 
-## ----custom_result1, eval=TRUE------------------------------------------------
+## ----custom_result1, eval=TRUE, echo=FALSE------------------------------------
 knitr::kable(custom_result)
 

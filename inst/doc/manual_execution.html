@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Ege Ulgen" />
 
-<meta name="date" content="2019-12-06" />
+<meta name="date" content="2020-06-06" />
 
 <title>Step-by-Step Execution of the pathfindR Enrichment Workflow</title>
 
@@ -120,9 +119,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -291,7 +287,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -306,7 +303,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Step-by-Step Execution of the pathfindR Enrichment Workflow</h1>
 <h4 class="author">Ege Ulgen</h4>
-<h4 class="date">2019-12-06</h4>
+<h4 class="date">2020-06-06</h4>
 
 
 
@@ -337,12 +334,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>RA_processed &lt;-<span class="st"> </span><span class="kw">input_processing</span>(<span class="dt">input =</span> RA_input, <span class="co"># the input: in this case, differential expression results</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a>                                 <span class="dt">p_val_threshold =</span> <span class="fl">0.05</span>, <span class="co"># p value threshold to filter significant genes</span></span>
 <span id="cb2-3"><a href="#cb2-3"></a>                                 <span class="dt">pin_name_path  =</span> <span class="st">&quot;Biogrid&quot;</span>, <span class="co"># the name of the PIN to use for active subnetwork search</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>                                 <span class="dt">convert2alias =</span> <span class="ot">TRUE</span>) <span class="co"># boolean indicating whether or not to convert missing symbols to alias symbols in the PIN</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a><span class="co">#&gt; Number of genes provided in input: 572</span></span>
-<span id="cb2-6"><a href="#cb2-6"></a><span class="co">#&gt; Number of genes in input after p-value filtering: 572</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="co">#&gt; </span></span>
-<span id="cb2-8"><a href="#cb2-8"></a><span class="co">#&gt; Could not find any interactions for 11 (1.92%) genes in the PIN</span></span>
-<span id="cb2-9"><a href="#cb2-9"></a><span class="co">#&gt; Final number of genes in input: 561</span></span></code></pre></div>
+<span id="cb2-4"><a href="#cb2-4"></a>                                 <span class="dt">convert2alias =</span> <span class="ot">TRUE</span>) <span class="co"># boolean indicating whether or not to convert missing symbols to alias symbols in the PIN</span></span></code></pre></div>
 <blockquote>
 <p>After checking that the data frame complies with the requirements, <code>input_processing()</code> filters the input so that genes with p values larger than <code>p_val_threshold</code> are excluded. Next, gene symbols that are not in the PIN are identified and excluded. For human genes, if aliases of these missing gene symbols are found in the PIN, these symbols are converted to the corresponding aliases (controlled by the argument <code>convert2alias</code>). This step is performed to best map the input data onto the PIN.</p>
 </blockquote>

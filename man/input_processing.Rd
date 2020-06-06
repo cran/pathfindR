@@ -4,7 +4,12 @@
 \alias{input_processing}
 \title{Process Input}
 \usage{
-input_processing(input, p_val_threshold, pin_name_path, convert2alias = TRUE)
+input_processing(
+  input,
+  p_val_threshold = 0.05,
+  pin_name_path = "Biogrid",
+  convert2alias = TRUE
+)
 }
 \arguments{
 \item{input}{the input data that pathfindR uses. The input must be a data
@@ -37,14 +42,11 @@ This function first filters the input so that all p values are less
 Process Input
 }
 \examples{
-\dontshow{
-input_processing(RA_input[1:20, ], 0.05, "KEGG")
-input_processing(RA_input[1:20, ], 0.05, "KEGG", convert2alias = FALSE)
-}
-\dontrun{
-input_processing(RA_input, 0.05, "KEGG")
-}
-
+processed_df <- input_processing(input = RA_input[1:5, ],
+                                 pin_name_path = "KEGG")
+processed_df <- input_processing(input = RA_input[1:10, ],
+                                 pin_name_path = "KEGG",
+                                 convert2alias = FALSE)
 }
 \seealso{
 See \code{\link{run_pathfindR}} for the wrapper function of the

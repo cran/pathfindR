@@ -1,9 +1,9 @@
 Package: pathfindR
 Type: Package
 Title: Enrichment Analysis Utilizing Active Subnetworks
-Version: 1.4.2
+Version: 1.5.0
 Authors@R: c(person("Ege", "Ulgen",
-                    role = "cre", 
+                    role = c("cre", "cph"), 
                     email = "egeulgen@gmail.com",
                     comment = c(ORCID = "0000-0003-2090-3621")),
              person("Ozan", "Ozisik",
@@ -28,22 +28,23 @@ Description: Enrichment analysis enables researchers to uncover mechanisms
     Comprehensive Identification of Enriched Pathways in Omics Data Through 
     Active Subnetworks. Front. Genet. <doi:10.3389/fgene.2019.00858>.
 License: MIT + file LICENSE
-URL: https://github.com/egeulgen/pathfindR
+URL: https://egeulgen.github.io/pathfindR/,
+        https://github.com/egeulgen/pathfindR
 BugReports: https://github.com/egeulgen/pathfindR/issues
 Encoding: UTF-8
 LazyData: true
 SystemRequirements: Java (>= 8.0)
 biocViews:
 Imports: DBI, AnnotationDbi, doParallel, foreach, rmarkdown,
-        org.Hs.eg.db, ggplot2, ggraph, fpc, grDevices, igraph, R.utils,
-        magick, KEGGREST, KEGGgraph, knitr
-Depends: R (>= 3.6)
-Suggests: testthat (>= 2.1.0), covr
-RoxygenNote: 7.0.0
+        org.Hs.eg.db, ggplot2, ggraph, ggupset, fpc, grDevices, igraph,
+        R.utils, magick, msigdbr, KEGGREST, KEGGgraph, knitr
+Depends: R (>= 4.0), pathfindR.data
+Suggests: testthat (>= 2.3.2), covr
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2019-12-05 21:47:37 UTC; egeulgen
-Author: Ege Ulgen [cre] (<https://orcid.org/0000-0003-2090-3621>),
+Packaged: 2020-06-06 10:45:28 UTC; egeulgen
+Author: Ege Ulgen [cre, cph] (<https://orcid.org/0000-0003-2090-3621>),
   Ozan Ozisik [aut] (<https://orcid.org/0000-0001-5980-8002>)
 Repository: CRAN
-Date/Publication: 2019-12-06 11:30:10 UTC
+Date/Publication: 2020-06-07 00:00:02 UTC

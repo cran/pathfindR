@@ -12,7 +12,7 @@ filterActiveSnws(
 )
 }
 \arguments{
-\item{active_snw_path}{path to the output of an Active Subnetwork Search.}
+\item{active_snw_path}{path to the output of an Active Subnetwork Search}
 
 \item{sig_genes_vec}{vector of significant gene symbols. In the scope of this
 package, these are the input genes that were used for active subnetwork search}
@@ -26,8 +26,10 @@ calculated to be < 2 (e.g. 50 signif. genes x 0.01 = 0.5), the threshold number
 is set to 2}
 }
 \value{
-A list of genes in every active subnetwork that has a score greater than
-the `score_quan_thr`th quantile and that contains at least `sig_gene_thr` of significant genes.
+A list containing \code{subnetworks}: a list of of genes in every
+active subnetwork that has a score greater than the \code{score_quan_thr}th
+quantile and that contains at least \code{sig_gene_thr} of significant genes
+and \code{scores} the score of each filtered active subnetwork
 }
 \description{
 Parse Active Subnetwork Search Output File and Filter the Subnetworks
@@ -36,8 +38,7 @@ Parse Active Subnetwork Search Output File and Filter the Subnetworks
 path2snw_list <- system.file("extdata/resultActiveSubnetworkSearch.txt",
                               package = "pathfindR")
 filtered <- filterActiveSnws(active_snw_path = path2snw_list,
-                             sig_genes_vec = pathfindR::RA_input$Gene.symbol)
-unlink("active_snw_search", recursive = TRUE)
+                             sig_genes_vec = RA_input$Gene.symbol)
 }
 \seealso{
 See \code{\link{run_pathfindR}} for the wrapper function of the

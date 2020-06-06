@@ -232,7 +232,7 @@ run_pathfindR <- function(input,
   ## Prep for parallel run
   message("## Performing Active Subnetwork Search and Enrichment")
   # Initiate the clusters
-  cl <- parallel::makeCluster(n_processes)
+  cl <- parallel::makeCluster(n_processes, setup_strategy = "sequential")
   doParallel::registerDoParallel(cl)
 
   dirs <- c()
@@ -360,7 +360,7 @@ run_pathfindR <- function(input,
 #'
 #' @param gene_sets Name of the gene sets to be used for enrichment analysis.
 #'  Available gene sets are "KEGG", "Reactome", "BioCarta", "GO-All",
-#'  "GO-BP", "GO-CC", "GO-MF", "mmu_KEGG" or "Custom".
+#'  "GO-BP", "GO-CC", "GO-MF", "cell_markers", "mmu_KEGG" or "Custom".
 #'  If "Custom", the arguments \code{custom_genes} and \code{custom_descriptions}
 #'  must be specified. (Default = "KEGG")
 #' @param min_gset_size minimum number of genes a term must contain (default = 10)
@@ -391,6 +391,7 @@ fetch_gene_set <- function(gene_sets = "KEGG",
   ### Argument checks
   all_gs_opts <- c("KEGG", "Reactome", "BioCarta",
                    "GO-All", "GO-BP", "GO-CC", "GO-MF",
+                   "cell_markers",
                    "mmu_KEGG", "Custom")
   if (!gene_sets %in% all_gs_opts) {
     stop("`gene_sets` should be one of ", paste(dQuote(all_gs_opts), collapse = ", "))
@@ -437,9 +438,9 @@ fetch_gene_set <- function(gene_sets = "KEGG",
   ### Built-in Gene Sets
   ## GO gene sets
   if (grepl("^GO", gene_sets)) {
-    genes_by_term <- pathfindR::go_all_genes
+    genes_by_term <- pathfindR.data::go_all_genes
 
-    GO_df <- GO_all_terms_df
+    GO_df <- pathfindR.data:::GO_all_terms_df
     term_descriptions <- GO_df$GO_term
     names(term_descriptions) <- GO_df$GO_ID
 
@@ -460,17 +461,20 @@ fetch_gene_set <- function(gene_sets = "KEGG",
     ## non-GO (KEGG, Reactome, BioCarta, mmu_KEGG)
   } else {
     if (gene_sets == "KEGG") {
-      genes_by_term <- pathfindR::kegg_genes
-      term_descriptions <- pathfindR::kegg_descriptions
+      genes_by_term <- pathfindR.data::kegg_genes
+      term_descriptions <- pathfindR.data::kegg_descriptions
     } else if (gene_sets == "Reactome") {
-      genes_by_term <- pathfindR::reactome_genes
-      term_descriptions <- pathfindR::reactome_descriptions
-    } else if(gene_sets == "BioCarta"){
-      genes_by_term <- pathfindR::biocarta_genes
-      term_descriptions <- pathfindR::biocarta_descriptions
+      genes_by_term <- pathfindR.data::reactome_genes
+      term_descriptions <- pathfindR.data::reactome_descriptions
+    } else if (gene_sets == "BioCarta"){
+      genes_by_term <- pathfindR.data::biocarta_genes
+      term_descriptions <- pathfindR.data::biocarta_descriptions
+    } else if (gene_sets == "mmu_KEGG") {
+      genes_by_term <- pathfindR.data::mmu_kegg_genes
+      term_descriptions <- pathfindR.data::mmu_kegg_descriptions
     } else {
-      genes_by_term <- pathfindR::mmu_kegg_genes
-      term_descriptions <- pathfindR::mmu_kegg_descriptions
+      genes_by_term <- pathfindR.data::cell_markers_gsets
+      term_descriptions <- pathfindR.data::cell_markers_descriptions
     }
   }
 
@@ -518,7 +522,7 @@ return_pin_path <- function(pin_name_path = "Biogrid") {
     if (!file.exists(path)) {
 
       adj_list <- utils::getFromNamespace(paste0(tolower(pin_name_path), "_adj_list"),
-                                          ns = "pathfindR")
+                                          ns = "pathfindR.data")
 
       pin_df <- lapply(seq_along(adj_list),
                        function(i, nm, val) data.frame(base::toupper(nm[[i]]),
@@ -642,16 +646,13 @@ input_testing <- function(input, p_val_threshold = 0.05) {
 #'   pathfindR workflow
 #'
 #' @examples
-#' \dontshow{
-#' input_processing(RA_input[1:20, ], 0.05, "KEGG")
-#' input_processing(RA_input[1:20, ], 0.05, "KEGG", convert2alias = FALSE)
-#' }
-#' \dontrun{
-#' input_processing(RA_input, 0.05, "KEGG")
-#' }
-#'
-input_processing <- function(input, p_val_threshold,
-                             pin_name_path, convert2alias = TRUE) {
+#' processed_df <- input_processing(input = RA_input[1:5, ],
+#'                                  pin_name_path = "KEGG")
+#' processed_df <- input_processing(input = RA_input[1:10, ],
+#'                                  pin_name_path = "KEGG",
+#'                                  convert2alias = FALSE)
+input_processing <- function(input, p_val_threshold = 0.05,
+                             pin_name_path = "Biogrid", convert2alias = TRUE) {
 
   if (!is.logical(convert2alias)) {
     stop("`convert2alias` should be either TRUE or FALSE")
@@ -804,7 +805,7 @@ input_processing <- function(input, p_val_threshold,
 #'                                         input_processed = example_gene_data)
 annotate_term_genes <- function(result_df,
                                 input_processed,
-                                genes_by_term = pathfindR::kegg_genes) {
+                                genes_by_term = pathfindR.data::kegg_genes) {
   ### Argument checks
   if(!is.data.frame(result_df)) {
     stop("`result_df` should be a data frame")

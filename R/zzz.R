@@ -35,6 +35,10 @@ fetch_java_version <- function() {
     java <- Sys.which("java")
   }
 
+  if (java == "")
+    stop("Java version not detected. Please download and install Java from ",
+         dQuote("https://www.java.com/en/"))
+
   version <- system2(java, "-version", stderr = TRUE, stdout = TRUE)
   if (length(version) < 1) {
     stop("Java version not detected. Please download and install Java from ",
@@ -52,8 +56,6 @@ fetch_java_version <- function() {
 #' @return only parses and checks whether the java version is >= 1.8
 #'
 #' @details this function was adapted from the CRAN package \code{sparklyr}
-#'
-#' @export
 check_java_version <- function(version = NULL) {
 
   if (is.null(version))
@@ -73,9 +75,6 @@ check_java_version <- function(version = NULL) {
   parsedVersion <- gsub("^\"|\"$", "", vers_string)
   parsedVersion <- gsub("_", ".", parsedVersion)
   parsedVersion <- gsub("[^0-9.]+", "", parsedVersion)
-
-  if (!is.character(parsedVersion) || nchar(parsedVersion) < 1)
-    stop("Java version detected but couldn't parse version from: ", versionLine)
 
   # ensure Java 1.8 (8) or higher
   if (utils::compareVersion(parsedVersion, "1.8") < 0)
