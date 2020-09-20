@@ -12,10 +12,26 @@
 
 <meta name="author" content="Ege Ulgen" />
 
-<meta name="date" content="2020-06-06" />
+<meta name="date" content="2020-09-20" />
 
 <title>Introduction to pathfindR</title>
 
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -303,7 +319,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Introduction to pathfindR</h1>
 <h4 class="author">Ege Ulgen</h4>
-<h4 class="date">2020-06-06</h4>
+<h4 class="date">2020-09-20</h4>
 
 
 
@@ -466,6 +482,16 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The first 2 rows of the output data frame of the example analysis on the rheumatoid arthritis gene-level differential expression input data (<code>RA_input</code>) is shown below:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(RA_output, <span class="dv">2</span>))</span></code></pre></div>
 <table>
+<colgroup>
+<col width="4%"></col>
+<col width="11%"></col>
+<col width="7%"></col>
+<col width="5%"></col>
+<col width="4%"></col>
+<col width="4%"></col>
+<col width="29%"></col>
+<col width="33%"></col>
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">ID</th>
@@ -539,6 +565,18 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="co">## First 2 rows of clustered data frame</span></span>
 <span id="cb17-2"><a href="#cb17-2"></a>knitr<span class="op">::</span><span class="kw">kable</span>(<span class="kw">head</span>(RA_clustered, <span class="dv">2</span>))</span></code></pre></div>
 <table>
+<colgroup>
+<col width="3%"></col>
+<col width="10%"></col>
+<col width="6%"></col>
+<col width="4%"></col>
+<col width="3%"></col>
+<col width="4%"></col>
+<col width="26%"></col>
+<col width="30%"></col>
+<col width="3%"></col>
+<col width="6%"></col>
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">ID</th>
@@ -583,9 +621,22 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="co">## The representative terms</span></span>
 <span id="cb18-2"><a href="#cb18-2"></a>knitr<span class="op">::</span><span class="kw">kable</span>(RA_clustered[RA_clustered<span class="op">$</span>Status <span class="op">==</span><span class="st"> &quot;Representative&quot;</span>, ])</span></code></pre></div>
 <table>
+<colgroup>
+<col width="1%"></col>
+<col width="3%"></col>
+<col width="16%"></col>
+<col width="5%"></col>
+<col width="4%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="23%"></col>
+<col width="30%"></col>
+<col width="2%"></col>
+<col width="5%"></col>
+</colgroup>
 <thead>
 <tr class="header">
-<th></th>
+<th align="left"></th>
 <th align="left">ID</th>
 <th align="left">Term_Description</th>
 <th align="right">Fold_Enrichment</th>
@@ -600,7 +651,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </thead>
 <tbody>
 <tr class="odd">
-<td>1</td>
+<td align="left">1</td>
 <td align="left">hsa03040</td>
 <td align="left">Spliceosome</td>
 <td align="right">3.097503</td>
@@ -613,7 +664,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="even">
-<td>2</td>
+<td align="left">2</td>
 <td align="left">hsa00190</td>
 <td align="left">Oxidative phosphorylation</td>
 <td align="right">2.523970</td>
@@ -626,7 +677,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="odd">
-<td>5</td>
+<td align="left">5</td>
 <td align="left">hsa03410</td>
 <td align="left">Base excision repair</td>
 <td align="right">4.801491</td>
@@ -639,7 +690,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="even">
-<td>7</td>
+<td align="left">7</td>
 <td align="left">hsa04064</td>
 <td align="left">NF-kappa B signaling pathway</td>
 <td align="right">2.535187</td>
@@ -652,7 +703,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="odd">
-<td>11</td>
+<td align="left">11</td>
 <td align="left">hsa03010</td>
 <td align="left">Ribosome</td>
 <td align="right">1.459401</td>
@@ -665,7 +716,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="even">
-<td>13</td>
+<td align="left">13</td>
 <td align="left">hsa03013</td>
 <td align="left">RNA transport</td>
 <td align="right">2.406823</td>
@@ -678,7 +729,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="odd">
-<td>14</td>
+<td align="left">14</td>
 <td align="left">hsa05418</td>
 <td align="left">Fluid shear stress and atherosclerosis</td>
 <td align="right">2.296365</td>
@@ -691,7 +742,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="even">
-<td>15</td>
+<td align="left">15</td>
 <td align="left">hsa04921</td>
 <td align="left">Oxytocin signaling pathway</td>
 <td align="right">2.200683</td>
@@ -704,7 +755,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="odd">
-<td>20</td>
+<td align="left">20</td>
 <td align="left">hsa04130</td>
 <td align="left">SNARE interactions in vesicular transport</td>
 <td align="right">4.660271</td>
@@ -717,7 +768,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="even">
-<td>21</td>
+<td align="left">21</td>
 <td align="left">hsa05230</td>
 <td align="left">Central carbon metabolism in cancer</td>
 <td align="right">1.864108</td>
@@ -730,7 +781,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="odd">
-<td>24</td>
+<td align="left">24</td>
 <td align="left">hsa05202</td>
 <td align="left">Transcriptional misregulation in cancer</td>
 <td align="right">1.909026</td>
@@ -743,7 +794,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="even">
-<td>27</td>
+<td align="left">27</td>
 <td align="left">hsa05203</td>
 <td align="left">Viral carcinogenesis</td>
 <td align="right">1.545846</td>
@@ -756,7 +807,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="odd">
-<td>40</td>
+<td align="left">40</td>
 <td align="left">hsa03050</td>
 <td align="left">Proteasome</td>
 <td align="right">1.473946</td>
@@ -769,7 +820,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="even">
-<td>82</td>
+<td align="left">82</td>
 <td align="left">hsa00330</td>
 <td align="left">Arginine and proline metabolism</td>
 <td align="right">4.045511</td>
@@ -782,7 +833,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <td align="left">Representative</td>
 </tr>
 <tr class="odd">
-<td>85</td>
+<td align="left">85</td>
 <td align="left">hsa04141</td>
 <td align="left">Protein processing in endoplasmic reticulum</td>
 <td align="right">1.211077</td>
@@ -943,6 +994,16 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb28-8"><a href="#cb28-8"></a></span>
 <span id="cb28-9"><a href="#cb28-9"></a>knitr<span class="op">::</span><span class="kw">kable</span>(custom_result)</span></code></pre></div>
 <table>
+<colgroup>
+<col width="1%"></col>
+<col width="4%"></col>
+<col width="4%"></col>
+<col width="3%"></col>
+<col width="2%"></col>
+<col width="2%"></col>
+<col width="77%"></col>
+<col width="4%"></col>
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">ID</th>

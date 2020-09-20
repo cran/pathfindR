@@ -1,3 +1,11 @@
+# pathfindR 1.5.1
+
+## Minor changes and bug fixes
+- Fixed issue in `check_java_version()` where java version 14 could not be parsed (#49)
+- Fixed issue in `combined_results_graph()` where gene nodes were not colored correctly (#55)
+
+***
+
 # pathfindR 1.5.0
 
 ## Major Changes
