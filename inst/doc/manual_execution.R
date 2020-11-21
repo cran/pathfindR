@@ -23,7 +23,7 @@ head(RA_input, 3)
 #  biocarta_descriptions <- biocarta_list[[2]]
 
 ## ----snw_search---------------------------------------------------------------
-#  n_iter <- 15 ## number of iterations
+#  n_iter <- 10 ## number of iterations
 #  combined_res <- NULL ## to store the result of each iteration
 #  
 #  for (i in 1:n_iter) {
@@ -39,7 +39,7 @@ head(RA_input, 3)
 #  
 #    ###### Enrichment Analyses
 #    current_res <- enrichment_analyses(snws = active_snws,
-#                                       input_genes = RA_processed$GENE,
+#                                       sig_genes_vec = RA_processed$GENE,
 #                                       pin_name_path = "Biogrid",
 #                                       genes_by_term = biocarta_gsets,
 #                                       term_descriptions = biocarta_descriptions,

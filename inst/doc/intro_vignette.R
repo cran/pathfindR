@@ -53,8 +53,8 @@ knitr::kable(head(RA_input))
 #  output_df <- run_pathfindR(input_df, iterations = 25)
 
 ## ----change_n_proc------------------------------------------------------------
-#  # n_processes defaults to (number of detected cores - 1)
-#  output_df <- run_pathfindR(input_df, n_processes = 2)
+#  # if not set, n_processes defaults to (number of detected cores - 1)
+#  output_df <- run_pathfindR(input_df, iterations = 5, n_processes = 2)
 
 ## ----example_out, eval=TRUE---------------------------------------------------
 knitr::kable(head(RA_output, 2))
@@ -152,7 +152,6 @@ knitr::kable(head(input_df))
 #                                 custom_genes = custom_genes,
 #                                 custom_descriptions = custom_descriptions,
 #                                 max_gset_size = Inf, # DO NOT LIMIT GENE SET SIZE
-#                                 iterations = 1, # for demo, setting number of iterations to 1
 #                                 output_dir = "misc/v1.4/CREB_MYC")
 #  
 #  knitr::kable(custom_result)

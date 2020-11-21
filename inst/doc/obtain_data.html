@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2020-09-20" />
+<meta name="date" content="2020-11-21" />
 
 <title>Obtaining PIN and Gene Sets Data</title>
 
@@ -31,6 +31,54 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+<style type="text/css">
+a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
+a.anchor-section::before {content: '#';}
+.hasAnchor:hover a.anchor-section {visibility: visible;}
+</style>
+<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
+document.addEventListener('DOMContentLoaded', function() {
+  // Do nothing if AnchorJS is used
+  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
+    return;
+  }
+
+  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+  // Do nothing if sections are already anchored
+  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
+    return null;
+  }
+
+  // Use section id when pandoc runs with --section-divs
+  const section_id = function(x) {
+    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
+            ? x.id : '');
+  };
+
+  // Add anchors
+  h.forEach(function(x) {
+    const id = x.id || section_id(x.parentElement);
+    if (id === '') {
+      return null;
+    }
+    let anchor = document.createElement('a');
+    anchor.href = '#' + id;
+    anchor.classList = ['anchor-section'];
+    x.classList.add('hasAnchor');
+    x.appendChild(anchor);
+  });
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -317,7 +365,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <h1 class="title toc-ignore">Obtaining PIN and Gene Sets Data</h1>
-<h4 class="date">2020-09-20</h4>
+<h4 class="date">2020-11-21</h4>
 
 
 
@@ -366,12 +414,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb8-4"><a href="#cb8-4"></a>                                 <span class="dt">collection =</span> <span class="st">&quot;C5&quot;</span>)</span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">## see msigdbr::msigdbr_show_species() for all available organisms</span></span>
 <span id="cb9-2"><a href="#cb9-2"></a>msigdbr<span class="op">::</span><span class="kw">msigdbr_show_species</span>()</span>
-<span id="cb9-3"><a href="#cb9-3"></a><span class="co">#&gt;  [1] &quot;Bos taurus&quot;               &quot;Caenorhabditis elegans&quot;  </span></span>
-<span id="cb9-4"><a href="#cb9-4"></a><span class="co">#&gt;  [3] &quot;Canis lupus familiaris&quot;   &quot;Danio rerio&quot;             </span></span>
-<span id="cb9-5"><a href="#cb9-5"></a><span class="co">#&gt;  [5] &quot;Drosophila melanogaster&quot;  &quot;Gallus gallus&quot;           </span></span>
-<span id="cb9-6"><a href="#cb9-6"></a><span class="co">#&gt;  [7] &quot;Homo sapiens&quot;             &quot;Mus musculus&quot;            </span></span>
-<span id="cb9-7"><a href="#cb9-7"></a><span class="co">#&gt;  [9] &quot;Rattus norvegicus&quot;        &quot;Saccharomyces cerevisiae&quot;</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a><span class="co">#&gt; [11] &quot;Sus scrofa&quot;</span></span></code></pre></div>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">#&gt; Warning: &#39;msigdbr::msigdbr_show_species&#39; is deprecated.</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co">#&gt; Use &#39;msigdbr_species&#39; instead.</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="co">#&gt; See help(&quot;Deprecated&quot;)</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co">#&gt;  [1] &quot;Bos taurus&quot;               &quot;Caenorhabditis elegans&quot;  </span></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">#&gt;  [3] &quot;Canis lupus familiaris&quot;   &quot;Danio rerio&quot;             </span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="co">#&gt;  [5] &quot;Drosophila melanogaster&quot;  &quot;Gallus gallus&quot;           </span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="co">#&gt;  [7] &quot;Homo sapiens&quot;             &quot;Mus musculus&quot;            </span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="co">#&gt;  [9] &quot;Rattus norvegicus&quot;        &quot;Saccharomyces cerevisiae&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="co">#&gt; [11] &quot;Sus scrofa&quot;</span></span></code></pre></div>
 <p>You may also obtain the gene sets for a subcollection by setting the <code>subcollection</code> argument:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">## obtaining C3 - MIR: microRNA targets</span></span>
 <span id="cb10-2"><a href="#cb10-2"></a>gsets_list &lt;-<span class="st"> </span><span class="kw">get_gene_sets_list</span>(<span class="dt">source =</span> <span class="st">&quot;MSigDB&quot;</span>,</span>

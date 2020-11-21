@@ -32,7 +32,7 @@ run_pathfindR(
   grSearchDepth = 1,
   grOverlap = 0.5,
   grSubNum = 1000,
-  iterations = 10,
+  iterations = 1,
   n_processes = NULL,
   score_quan_thr = 0.8,
   sig_gene_thr = 0.02,
@@ -124,14 +124,14 @@ nodes. In SA, initializes candidate solution with all positive nodes. (default =
 \item{grSubNum}{Number of subnetworks to be presented in the results (default = 1000)}
 
 \item{iterations}{number of iterations for active subnetwork search and
-enrichment analyses (Default = 10. Gets set to 1 for Genetic Algorithm)}
+enrichment analyses (Default = 1)}
 
 \item{n_processes}{optional argument for specifying the number of processes
 used by foreach. If not specified, the function determines this
 automatically (Default == NULL. Gets set to 1 for Genetic Algorithm)}
 
-\item{score_quan_thr}{active subnetwork score quantile threshold (Default = 0.80)
-Must be between 0 and 1 or set to -1 for not filtering}
+\item{score_quan_thr}{active subnetwork score quantile threshold. Must be
+between 0 and 1 or set to -1 for not filtering. (Default = 0.8)}
 
 \item{sig_gene_thr}{threshold for the minimum proportion of significant genes in
 the subnetwork (Default = 0.02) If the number of genes to use as threshold is
@@ -158,6 +158,7 @@ Data frame of pathfindR enrichment results. Columns are: \describe{
   \item{Term_Description}{Description of the enriched term}
   \item{Fold_Enrichment}{Fold enrichment value for the enriched term (Calculated using ONLY the input genes)}
   \item{occurrence}{the number of iterations that the given term was found to enriched over all iterations}
+  \item{support}{the median support (proportion of active subnetworks leading to enrichment within an iteration) over all iterations}
   \item{lowest_p}{the lowest adjusted-p value of the given term over all iterations}
   \item{highest_p}{the highest adjusted-p value of the given term over all iterations}
   \item{non_Signif_Snw_Genes (OPTIONAL)}{the non-significant active subnetwork genes, comma-separated}

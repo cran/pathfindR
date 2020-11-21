@@ -46,8 +46,8 @@ path/to/PIN.sif, the file must comply with the PIN specifications. (Default = "B
 \item{dir_for_parallel_run}{(previously created) directory for a parallel run iteration.
 Used in the wrapper function (see ?run_pathfindR) (Default = NULL)}
 
-\item{score_quan_thr}{active subnetwork score quantile threshold (Default = 0.80)
-Must be between 0 and 1 or set to -1 for not filtering}
+\item{score_quan_thr}{active subnetwork score quantile threshold. Must be
+between 0 and 1 or set to -1 for not filtering. (Default = 0.8)}
 
 \item{sig_gene_thr}{threshold for the minimum proportion of significant genes in
 the subnetwork (Default = 0.02) If the number of genes to use as threshold is
@@ -104,7 +104,8 @@ processed_df <- RA_input[1:15, -2]
 colnames(processed_df) <- c("GENE", "P_VALUE")
 GR_snws <- active_snw_search(input_for_search = processed_df,
                              pin_name_path = "KEGG",
-                             search_method = "GR")
+                             search_method = "GR",
+                             score_quan_thr = 0.8)
 # clean-up
 unlink("active_snw_search", recursive = TRUE)
 }

@@ -2,38 +2,45 @@
 ## Project: pathfindR
 ## Script purpose: Testthat testing script for
 ## core functions
-## Date: May 24, 2020
+## Date: Oct 3 2020
 ## Author: Ege Ulgen
 ##################################################
 
 # run_pathfindR -----------------------------------------------------------
 test_that("`run_pathfindR()` works as expected", {
   skip_on_cran()
-  ## GR
-  res <- run_pathfindR(RA_input[1:100, ],
-                       iterations = 1,
-                       n_processes = 2,
-                       max_to_plot = 1)
-  expect_is(res, "data.frame")
-  unlink("pathfindR_Results", recursive = TRUE)
 
-  expect_is(run_pathfindR(RA_input[1:100, ],
-                          iterations = 2,
+  out_dir <- file.path(tempdir(check = TRUE), "pathfindR_results")
+  ## GR
+  expect_is(run_pathfindR(RA_input[1:50, ],
+                          iterations = 1,
                           n_processes = 2,
+                          score_quan_thr = 0.8,
+                          max_to_plot = 1,
+                          output_dir = out_dir),
+            "data.frame")
+
+  expect_is(run_pathfindR(RA_input[1:50, ],
+                          iterations = 2,
+                          n_processes = 5,
                           gene_sets = "BioCarta",
                           pin_name_path = "GeneMania",
+                          score_quan_thr = 0.8,
                           plot_enrichment_chart = FALSE,
-                          visualize_enriched_terms = FALSE),
+                          visualize_enriched_terms = FALSE,
+                          output_dir = out_dir),
             "data.frame")
-  unlink("pathfindR_Results", recursive = TRUE)
 
   ## GA - n_processes <- 1 and n_processes <- iterations (iterations < n_processes)
   expected_warns <- c("Did not find any enriched terms!",
-                      "`iterations` is set to 1 because `search_method = \"GA\"",
-                      "`n_processes` is set to `iterations` because `iterations` < `n_processes`")
-  expect_warning(run_pathfindR(RA_input[1:2, ],
+                      "`iterations` is set to 1 because `search_method = \"GA\"")
+  expect_warning(run_pathfindR(RA_input[3:4, ],
                                search_method = "GA",
-                               output_dir = tempdir(check = TRUE)),
+                               iterations = 2,
+                               score_quan_thr = 0.8,
+                               pin_name_path = "KEGG",
+                               output_dir = file.path(tempdir(), "GA_example"),
+                               visualize_enriched_terms = FALSE),
                  paste0(paste(expected_warns, collapse = "|")), all = TRUE, perl = TRUE)
 
   ### output_dir renaming works
@@ -42,6 +49,7 @@ test_that("`run_pathfindR()` works as expected", {
     expect_warning(res <- run_pathfindR(RA_input[1:2, ],
                                         iterations = 1,
                                         n_processes = 1,
+                                        score_quan_thr = 0.8,
                                         visualize_enriched_terms = FALSE,
                                         output_dir = test_out_dir),
                    "Did not find any enriched terms!")
@@ -62,7 +70,7 @@ test_that("`run_pathfindR()` works as expected", {
                           search_method = "SA",
                           visualize_enriched_terms = FALSE,
                           plot_enrichment_chart = FALSE,
-                          output_dir = tempdir(check = TRUE)),
+                          output_dir = out_dir),
             "data.frame")
 
   ## GA
@@ -72,17 +80,17 @@ test_that("`run_pathfindR()` works as expected", {
                           search_method = "GA",
                           visualize_enriched_terms = FALSE,
                           plot_enrichment_chart = FALSE,
-                          output_dir = tempdir(check = TRUE)),
+                          output_dir = out_dir),
             "data.frame")
 })
 
 test_that("Expect warning with empty result from `run_pathfindR()`", {
   expect_warning(res <- run_pathfindR(RA_input[1:2, ],
                                       iterations = 1,
-                                      visualize_enriched_terms = FALSE),
+                                      visualize_enriched_terms = FALSE,
+                                      output_dir = file.path(tempdir(check = TRUE), "pathfindR_results")),
                  "Did not find any enriched terms!")
   expect_identical(res, data.frame())
-  unlink("pathfindR_Results", recursive = TRUE)
 })
 
 
@@ -108,7 +116,7 @@ test_that("`run_pathfindR()` arg checks work", {
                "`iterations` should be a positive integer")
 
   expect_error(run_pathfindR(RA_input, iterations = 0),
-               "`iterations` should be > 1")
+               "`iterations` should be >= 1")
 
   expect_error(run_pathfindR(RA_input, n_processes = "INVALID"),
                "`n_processes` should be either NULL or a positive integer")
@@ -305,7 +313,7 @@ test_that("`return_pin_path()` returns the absolute path to PIN file", {
   expect_true(file.exists(return_pin_path("mmu_STRING")))
 
   # custom PIN
-  custom_pin <- read.delim(return_pin_path("GeneMania"),
+  custom_pin <- read.delim(return_pin_path("KEGG"),
                            header = FALSE,
                            stringsAsFactors = FALSE)
   custom_pin <- custom_pin[1:10,]
@@ -394,15 +402,15 @@ test_that("`input_processing()` works", {
   skip_on_cran()
   expect_is(tmp <- input_processing(input = RA_input[1:5, ],
                                     p_val_threshold = 0.05,
-                                    pin_name_path = "Biogrid",
+                                    pin_name_path = "KEGG",
                                     convert2alias = TRUE),
             "data.frame")
   expect_true(ncol(tmp) == 4)
   expect_true(nrow(tmp) <= nrow(RA_input))
 
-  expect_is(input_processing(RA_input[1:5, ],
+  expect_is(input_processing(RA_input[5:10, ],
                              p_val_threshold = 0.01,
-                             pin_name_path = "Biogrid",
+                             pin_name_path = "KEGG",
                              convert2alias = FALSE),
             "data.frame")
 

@@ -1,3 +1,16 @@
+# pathfindR 1.6.0
+
+## Major Changes
+- In `run_pathfindR()`, as "GR" (the default active subnetwork search method) provides nearly identical results in each iteration, the default `iterations` is set to 1
+- added the column 'support' (the proportion of active subnetworks leading to enrichment over all subnetworks) in the output
+- updated the download URL in `get_biogrid_pin()` as BioGRID updated the URL for download
+
+## Minor changes and bug fixes
+- changed old argument in the "Step-by-Step Execution of the pathfindR Enrichment Workflow" vignette
+- fixed an issue in `visualize_term_interactions()` where the file name was too long, it was causing an error on Windows. Limited to 100 characters (#58)
+
+***
+
 # pathfindR 1.5.1
 
 ## Minor changes and bug fixes

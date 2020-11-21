@@ -2,7 +2,7 @@
 ## Project: pathfindR
 ## Script purpose: Testthat testing script for
 ## active subnetwork search functions
-## Date: June 4, 2020
+## Date: Nov 20, 2020
 ## Author: Ege Ulgen
 ##################################################
 
@@ -10,7 +10,7 @@
 input_df1 <- suppressMessages(input_processing(RA_input[1:100, ],
                                                p_val_threshold = 0.05,
                                                pin_name_path = "Biogrid"))
-input_df2 <- suppressMessages(input_processing(RA_input[1:3, ],
+input_df2 <- suppressMessages(input_processing(RA_input[1:2, ],
                                                p_val_threshold = 0.05,
                                                pin_name_path = "Biogrid"))
 
@@ -20,21 +20,23 @@ test_that("`active_snw_search()` returns list object", {
                  "Found [1-9]\\d* active subnetworks")
   expect_is(snw_list, "list")
   expect_is(snw_list[[1]], "character")
+  expect_true(length(snw_list) > 0)
   unlink("active_snw_search", recursive = TRUE)
 
   # Expect no active snws
-  expect_message(snw_list <- active_snw_search(input_for_search = input_df2),
+  expect_message(snw_list <- active_snw_search(input_for_search = input_df2,
+                                               sig_gene_thr = 1),
                  "Found 0 active subnetworks")
   expect_identical(snw_list, list())
   unlink("active_snw_search", recursive = TRUE)
 
   # dir_for_parallel_run works?
-  dir.create("dummy_dir")
+  dummy_dir <- file.path(tempdir(check = TRUE), "dummy_dir")
+  dir.create(dummy_dir)
   expect_message(snw_list <- active_snw_search(input_for_search = input_df1,
-                                               dir_for_parallel_run = "dummy_dir"),
+                                               dir_for_parallel_run = dummy_dir),
                  "Found [1-9]\\d* active subnetworks")
-  expect_true(file.exists("dummy_dir/active_snw_search/active_snws.txt"))
-  unlink("dummy_dir", recursive = TRUE)
+  expect_true(file.exists(file.path(dummy_dir, "active_snw_search/active_snws.txt")))
 })
 
 test_that("All search methods for `active_snw_search()` work", {
@@ -118,7 +120,7 @@ test_that("`filterActiveSnws()` returns list object", {
   expect_true(length(tmp_filtered$subnetworks) <= example_snws_len)
 
   # empty file case
-  empty_path <- file.path(tempdir(), "empty.txt")
+  empty_path <- tempfile("empty", fileext = ".txt")
   file.create(empty_path)
   expect_null(suppressWarnings(filterActiveSnws(active_snw_path = empty_path,
                                                 sig_genes_vec = RA_input$Gene.symbol)))
@@ -191,7 +193,7 @@ test_that("`filterActiveSnws()` arg checks work", {
 # visualize_active_subnetworks --------------------------------------------
 test_that("`visualize_active_subnetworks()` returns list of ggraph objects", {
   # empty file case
-  empty_path <- file.path(tempdir(), "empty.txt")
+  empty_path <- tempfile("empty", fileext = ".txt")
   file.create(empty_path)
   expect_null(visualize_active_subnetworks(active_snw_path = empty_path,
                                            genes_df = RA_input[1:5,]))
@@ -204,8 +206,8 @@ test_that("`visualize_active_subnetworks()` returns list of ggraph objects", {
   expect_is(g_list[[1]], "ggraph")
   expect_true(length(g_list) <= example_snws_len)
 
-  # set `num_snws` to 3
-  g_list <- visualize_active_subnetworks(sample_path, input_df, num_snws = 3)
+  # set `num_snws` to larger than actual number
+  g_list <- visualize_active_subnetworks(sample_path, input_df, num_snws = 21)
   expect_is(g_list, "list")
   expect_is(g_list[[1]], "ggraph")
   expect_length(g_list, 3)

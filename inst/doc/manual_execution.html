@@ -12,7 +12,7 @@
 
 <meta name="author" content="Ege Ulgen" />
 
-<meta name="date" content="2020-09-20" />
+<meta name="date" content="2020-11-21" />
 
 <title>Step-by-Step Execution of the pathfindR Enrichment Workflow</title>
 
@@ -32,6 +32,54 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+<style type="text/css">
+a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
+a.anchor-section::before {content: '#';}
+.hasAnchor:hover a.anchor-section {visibility: visible;}
+</style>
+<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
+document.addEventListener('DOMContentLoaded', function() {
+  // Do nothing if AnchorJS is used
+  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
+    return;
+  }
+
+  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+  // Do nothing if sections are already anchored
+  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
+    return null;
+  }
+
+  // Use section id when pandoc runs with --section-divs
+  const section_id = function(x) {
+    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
+            ? x.id : '');
+  };
+
+  // Add anchors
+  h.forEach(function(x) {
+    const id = x.id || section_id(x.parentElement);
+    if (id === '') {
+      return null;
+    }
+    let anchor = document.createElement('a');
+    anchor.href = '#' + id;
+    anchor.classList = ['anchor-section'];
+    x.classList.add('hasAnchor');
+    x.appendChild(anchor);
+  });
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -319,7 +367,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Step-by-Step Execution of the pathfindR Enrichment Workflow</h1>
 <h4 class="author">Ege Ulgen</h4>
-<h4 class="date">2020-09-20</h4>
+<h4 class="date">2020-11-21</h4>
 
 
 
@@ -371,8 +419,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="active-subnetwork-search-and-enrichment-analyses" class="section level1">
 <h1>Active Subnetwork Search and Enrichment Analyses</h1>
 <p>As outlined in the vignette <a href="intro_vignette.html">Introduction to pathfindR</a>, <code>run_pathfindR()</code> initially identifies and filters active subnetworks, then performs enrichment analyses on these subnetworks and summarize the results.</p>
-<p>To perform these steps manually, we utilize the function <code>active_snw_search()</code> for identifying and filtering active subnetworks and the function <code>enrichment_analyses()</code> for obtaining enriched terms using these subnetworks. Because the active subnetwork search algorithms are stochastic, we suggest iterating these subnetwork identification and enrichment steps multiple times <a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>n_iter &lt;-<span class="st"> </span><span class="dv">15</span> <span class="co">## number of iterations</span></span>
+<p>To perform these steps manually, we utilize the function <code>active_snw_search()</code> for identifying and filtering active subnetworks and the function <code>enrichment_analyses()</code> for obtaining enriched terms using these subnetworks. Because the active subnetwork search algorithms are stochastic, we suggest iterating these subnetwork identification and enrichment steps multiple times (especially for “SA”)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>n_iter &lt;-<span class="st"> </span><span class="dv">10</span> <span class="co">## number of iterations</span></span>
 <span id="cb4-2"><a href="#cb4-2"></a>combined_res &lt;-<span class="st"> </span><span class="ot">NULL</span> <span class="co">## to store the result of each iteration</span></span>
 <span id="cb4-3"><a href="#cb4-3"></a></span>
 <span id="cb4-4"><a href="#cb4-4"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_iter) {</span>
@@ -388,7 +436,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb4-14"><a href="#cb4-14"></a>  </span>
 <span id="cb4-15"><a href="#cb4-15"></a>  <span class="co">###### Enrichment Analyses</span></span>
 <span id="cb4-16"><a href="#cb4-16"></a>  current_res &lt;-<span class="st"> </span><span class="kw">enrichment_analyses</span>(<span class="dt">snws =</span> active_snws,</span>
-<span id="cb4-17"><a href="#cb4-17"></a>                                     <span class="dt">input_genes =</span> RA_processed<span class="op">$</span>GENE,</span>
+<span id="cb4-17"><a href="#cb4-17"></a>                                     <span class="dt">sig_genes_vec =</span> RA_processed<span class="op">$</span>GENE,</span>
 <span id="cb4-18"><a href="#cb4-18"></a>                                     <span class="dt">pin_name_path =</span> <span class="st">&quot;Biogrid&quot;</span>, </span>
 <span id="cb4-19"><a href="#cb4-19"></a>                                     <span class="dt">genes_by_term =</span> biocarta_gsets,</span>
 <span id="cb4-20"><a href="#cb4-20"></a>                                     <span class="dt">term_descriptions =</span> biocarta_descriptions,</span>
