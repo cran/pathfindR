@@ -2,7 +2,7 @@
 ## Project: pathfindR
 ## Script purpose: Testthat testing script for
 ## core functions
-## Date: Oct 3 2020
+## Date: Dec 4, 2020
 ## Author: Ege Ulgen
 ##################################################
 
@@ -27,7 +27,6 @@ test_that("`run_pathfindR()` works as expected", {
                           pin_name_path = "GeneMania",
                           score_quan_thr = 0.8,
                           plot_enrichment_chart = FALSE,
-                          visualize_enriched_terms = FALSE,
                           output_dir = out_dir),
             "data.frame")
 
@@ -127,6 +126,7 @@ test_that("`run_pathfindR()` arg checks work", {
 
 # fetch_gene_set ----------------------------------------------------------
 test_that("`fetch_gene_set()` can fetch all gene set objects", {
+  skip_on_cran()
   ###### KEGG
   expect_is(gset_obj <- fetch_gene_set(gene_sets = "KEGG",
                                        min_gset_size = 10,
@@ -241,6 +241,7 @@ test_that("`fetch_gene_set()` can fetch all gene set objects", {
 })
 
 test_that("min/max_gset_size args in `fetch_gene_set()` correctly filter gene sets", {
+  skip_on_cran()
   expect_is(gset_obj1 <- fetch_gene_set(gene_sets = "KEGG",
                                         min_gset_size = 10,
                                         max_gset_size = 300),
