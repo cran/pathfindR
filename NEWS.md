@@ -1,3 +1,24 @@
+# pathfindR 1.6.2
+
+## Major Changes
+- fixed an issue in `get_kegg_gsets()` where empty result was returned for some organisms due to an error in parsing (#72)
+
+## Minor changes and bug fixes
+- added `repel = TRUE` in `term_gene_graph()` and `combined_results_graph()` for better visualization of labels
+- fixed minor issue in `enrichment_chart()` (#75)
+- fixed minor issue in `visualize_term_interactions()`
+- fixed issue in `get_biogrid_pin()` where the download method was set to `wget` (now set to `auto`, per #83)
+- updated to using tab3 format for `get_biogrid_pin()` (if tab3 is available for the chosen release, otherwise tab2 format is used)
+- updated the default version of PIN obtained by `get_biogrid_pin()` to '4.4.200'
+- in `get_kegg_gsets()`, improved parsing of KEGG term descriptions so that no description is duplicated (#87)
+- in `score_terms()`, if using descriptions, the ID is now appended for (any) duplicated term descriptions (#87)
+- in `obtain_colored_url()`, swapped `bg_color` with `fg_color` due to an issue with `KEGGREST`
+- added legend to `term_gene_heatmap()` (#95)
+- in `get_biogrid_pin()`, the "download.file.method" from global options is used
+- `combined_results_graph()` raises an error if there are no common terms in the combined data frame
+
+***
+
 # pathfindR 1.6.1
 
 ## Major Changes

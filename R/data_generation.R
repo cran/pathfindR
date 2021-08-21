@@ -25,12 +25,12 @@ process_pin <- function(pin_df) {
 #' list of available organisms (default = "Homo_sapiens")
 #' @param path2pin the path of the file to save the PIN data. By default, the
 #' PIN data is saved in a temporary file
-#' @param release the requested BioGRID release (default = "4.2.191")
+#' @param release the requested BioGRID release (default = "4.4.200")
 #'
 #' @return the path of the file in which the PIN data was saved. If
 #' \code{path2pin} was not supplied by the user, the PIN data is saved in a
 #' temporary file
-get_biogrid_pin <- function(org = "Homo_sapiens", path2pin, release = "4.2.191") {
+get_biogrid_pin <- function(org = "Homo_sapiens", path2pin, release = "4.4.200") {
   # check organism name
   all_org_names <- c("Anopheles_gambiae_PEST", "Apis_mellifera",
                      "Arabidopsis_thaliana_Columbia", "Bacillus_subtilis_168",
@@ -75,15 +75,18 @@ get_biogrid_pin <- function(org = "Homo_sapiens", path2pin, release = "4.2.191")
   # release directory for download
   rel_dir <- paste0("BIOGRID-", release)
 
+  # choose tab2 vs. tab3
+  tab_v <- ifelse(utils::compareVersion(release, "3.5.183") == -1, ".tab2", ".tab3")
+
   # download tab2 format organism files
   tmp <- tempfile()
-  fname <- paste0("BIOGRID-ORGANISM-", release, ".tab2")
+  fname <- paste0("BIOGRID-ORGANISM-", release, tab_v)
   biogrid_url <- paste0("https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/", rel_dir, "/", fname, ".zip")
-  utils::download.file(biogrid_url, tmp, method = "wget", quiet = TRUE)
+  utils::download.file(biogrid_url, tmp, method = getOption("download.file.method"), quiet = TRUE)
 
   # parse organism names
   all_org_files <- utils::unzip(tmp, list = TRUE)
-  all_org_files$Organism <- sub("\\.tab2\\.txt", "", all_org_files$Name)
+  all_org_files$Organism <- sub("\\.tab\\d\\.txt", "", all_org_files$Name)
   all_org_files$Organism <- sub("BIOGRID-ORGANISM-", "", all_org_files$Organism)
   all_org_files$Organism <- sub("-.*\\d+$", "", all_org_files$Organism)
 
@@ -199,11 +202,21 @@ get_kegg_gsets <- function(org_code = "hsa") {
   # parse pathway genes
   genes_by_pathway <- lapply(pathway_codes, function(pwid) {
     pw <- KEGGREST::keggGet(pwid)
-    pw <- pw[[1]]$GENE[c(FALSE, TRUE)] ## get gene symbols
+
+    ## get gene symbols
+    all_entries <- pw[[1]]$GENE
+    if(is.null(all_entries))
+      return(NULL)
+    tmp <- c(TRUE, FALSE)
+    if (grepl(";", all_entries[2])) {
+      tmp <- c(FALSE, TRUE)
+    }
+    pw <- all_entries[tmp]
+
     pw <- sub(";.+", "", pw) ## discard any description
     pw <- pw[grep("^[A-Za-z0-9_-]+(\\@)?$", pw)] ## remove mistaken lines
     pw <- unique(pw) ## keep unique genes
-    pw
+    return(pw)
   })
 
   names(genes_by_pathway) <- pathway_codes
@@ -213,7 +226,7 @@ get_kegg_gsets <- function(org_code = "hsa") {
 
   kegg_descriptions <- pathways_list
   names(kegg_descriptions) <- sub("path:", "", names(kegg_descriptions))
-  kegg_descriptions <- sub(" -.*\\(.*\\)$", "", kegg_descriptions)
+  kegg_descriptions <- sub(" & .*$", "", sub("-([^-]*)$", "&\\1", kegg_descriptions))
   kegg_descriptions <- kegg_descriptions[names(kegg_descriptions) %in% names(kegg_genes)]
 
   result <- list(gene_sets = kegg_genes, descriptions = kegg_descriptions)

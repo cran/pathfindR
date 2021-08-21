@@ -231,10 +231,10 @@ visualize_term_interactions <- function(result_df, pin_name_path) {
                                               offset = "+10+10")
 
       # remove forbidden characters
-      current_row$Term_Description <- gsub('[ :<>?*|"/\\]', "_", current_row$Term_Description)
+      current_row$Term_Description <- gsub('[, :<>?*|"/\\]', "_", current_row$Term_Description)
 
       # limit to 100 characters
-      current_row$Term_Description <- substr(current_row$Term_Description, 1, min(100, nchar(current_row$Term_Description)))
+      current_row$Term_Description <- substr(current_row$Term_Description, 1, min(50, nchar(current_row$Term_Description)))
 
       path_to_png <- file.path("term_visualizations",
                                paste0(current_row$Term_Description, ".png"))
@@ -666,8 +666,8 @@ obtain_colored_url <- function(pw_id, KEGG_gene_ids, fg_cols, bg_cols) {
   pw_url <- tryCatch({
     KEGGREST::color.pathway.by.objects(pathway.id = pw_id,
                                        object.id.list = KEGG_gene_ids,
-                                       fg.color.list = fg_cols,
-                                       bg.color.list = bg_cols)
+                                       fg.color.list = bg_cols,
+                                       bg.color.list = fg_cols)
   }, error = function(e) {
     message(paste("Cannot retrieve PNG url:", pw_id))
     message("Here's the original error message:")
@@ -820,7 +820,7 @@ enrichment_chart <- function(result_df,
     g <- g + ggplot2::scale_size_continuous(breaks = brks)
   }
 
-  g <- g + ggplot2::scale_color_continuous(low = "#f5efef", high = "red")
+  g <- g + ggplot2::scale_color_gradient(low = "#f5efef", high = "red")
 
   if (plot_by_cluster & "Cluster" %in% colnames(result_df)) {
     g <- g + ggplot2::facet_grid(result_df$Cluster ~ .,
@@ -976,12 +976,13 @@ term_gene_graph <- function(result_df, num_terms = 10,
                                                   length.out = 4)),
                                name = size_label)
   p <- p + ggplot2::theme_void()
-  p <- p + ggraph::geom_node_text(ggplot2::aes_(label = ~name), nudge_y = .2)
-  p <- p + ggplot2::scale_colour_manual(values = unique(igraph::V(g)$color),
-                                        name = NULL,
-                                        labels = c("enriched term",
-                                                   "up-regulated gene",
-                                                   "down-regulated gene"))
+  p <- p + suppressWarnings(ggraph::geom_node_text(ggplot2::aes_(label = ~name), nudge_y = .2,
+                                                   repel = TRUE, max.overlaps = 20))
+  p <- p + ggplot2::scale_color_manual(values = unique(igraph::V(g)$color),
+                                       name = NULL,
+                                       labels = c("enriched term",
+                                                  "up-regulated gene",
+                                                  "down-regulated gene"))
   if (is.null(num_terms)) {
     p <- p + ggplot2::ggtitle("Term-Gene Graph")
   } else {
@@ -1153,7 +1154,6 @@ term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
   }
   g <- ggplot2::ggplot(bg_df, ggplot2::aes_(x = ~Symbol, y = ~Enriched_Term))
   g <- g + ggplot2::geom_tile(fill = "white", color = "white")
-  g <- g + ggplot2::guides(fill = FALSE)
   g <- g + ggplot2::theme(axis.ticks.y = ggplot2::element_blank(),
                           axis.text.x = ggplot2::element_text(angle = 90, hjust = 1),
                           axis.text.y = ggplot2::element_text(colour="#000000"),
@@ -1163,7 +1163,8 @@ term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
                           panel.grid.major.y = ggplot2::element_blank(),
                           panel.grid.minor.x = ggplot2::element_blank(),
                           panel.grid.minor.y = ggplot2::element_blank(),
-                          panel.background = ggplot2::element_rect(fill="#ffffff"))
+                          panel.background = ggplot2::element_rect(fill="#ffffff"),
+                          legend.title = ggplot2::element_blank())
   g <- g + ggplot2::geom_tile(data = term_genes_df,
                               ggplot2::aes_(fill = ~value), color = "gray60")
   if (!missing(genes_df)) {
@@ -1194,7 +1195,7 @@ term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
 #' @export
 #'
 #' @examples
-#' UpSet_plot(RA_output)
+#' UpSet_plot(RA_comparison_output)
 UpSet_plot <- function(result_df, genes_df, num_terms = 10,
                        method = "heatmap",
                        use_description = FALSE,

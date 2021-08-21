@@ -117,6 +117,9 @@ combined_results_graph <- function(combined_df, selected_terms = "common",
   ############ Initial steps
   ### Filter for selected terms
   if (any(selected_terms == "common")) {
+    if (!any(combined_df$status == "common")) {
+      stop("There are no common terms")
+    }
     combined_df <- combined_df[combined_df$status == "common", ]
   } else {
     if (!any(selected_terms %in% combined_df[, ID_column]))
@@ -202,7 +205,8 @@ combined_results_graph <- function(combined_df, selected_terms = "common",
                                                   length.out = 4)),
                                name = size_label)
   p <- p + ggplot2::theme_void()
-  p <- p + ggraph::geom_node_text(ggplot2::aes_(label = ~name), nudge_y = .2)
+  p <- p + suppressWarnings(ggraph::geom_node_text(ggplot2::aes_(label = ~name), nudge_y = .2,
+                                                   repel = TRUE, max.overlaps = 20))
 
   vertex_cols <- c("Common term" = "#FCCA46",
                    "A-only term" = "#9FB8AD",
