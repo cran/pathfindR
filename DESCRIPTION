@@ -1,7 +1,7 @@
 Package: pathfindR
 Type: Package
 Title: Enrichment Analysis Utilizing Active Subnetworks
-Version: 1.6.2
+Version: 1.6.3
 Authors@R: c(person("Ege", "Ulgen",
                     role = c("cre", "cph"), 
                     email = "egeulgen@gmail.com",
@@ -39,11 +39,11 @@ Imports: DBI, AnnotationDbi, doParallel, foreach, rmarkdown,
         R.utils, magick, msigdbr, KEGGREST, KEGGgraph, knitr
 Depends: R (>= 4.0), pathfindR.data
 Suggests: testthat (>= 2.3.2), covr
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-08-21 12:53:09 UTC; egeulgen
+Packaged: 2021-11-12 11:20:07 UTC; egeulgen
 Author: Ege Ulgen [cre, cph] (<https://orcid.org/0000-0003-2090-3621>),
   Ozan Ozisik [aut] (<https://orcid.org/0000-0001-5980-8002>)
 Repository: CRAN
-Date/Publication: 2021-08-21 13:20:02 UTC
+Date/Publication: 2021-11-15 09:20:04 UTC

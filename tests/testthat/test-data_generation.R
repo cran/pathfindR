@@ -6,6 +6,11 @@
 ## Author: Ege Ulgen
 ##################################################
 
+org_met <- getOption("download.file.method")
+org_extra <- getOption("download.file.extra")
+options(download.file.method="curl", download.file.extra="-k -L")
+on.exit(options(download.file.method = org_met, download.file.extra=org_extra))
+
 # get_biogrid_pin ---------------------------------------------------------
 test_that("`get_biogrid_pin()` returns a path to a valid PIN file", {
   skip_on_cran()
