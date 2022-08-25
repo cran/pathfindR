@@ -38,8 +38,8 @@ suppressPackageStartupMessages(library(pathfindR))
 #                               Interactor_B = sub("^10090\\.", "", mmu_string_df$protein2))
 #  head(mmu_string_pin, 2)
 
-## ----process_PIN2-------------------------------------------------------------
-#  library(biomaRt)
+## ----process_PIN2, eval=FALSE-------------------------------------------------
+#  # library(biomaRt)
 #  
 #  mmu_ensembl <- useMart("ensembl", dataset = "mmusculus_gene_ensembl")
 #  

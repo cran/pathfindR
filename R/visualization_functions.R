@@ -10,7 +10,8 @@
 #'  enrichment analysis or not (default = \code{TRUE})
 #' @inheritParams return_pin_path
 #' @param ... additional arguments for \code{\link{visualize_hsa_KEGG}} (used
-#' when \code{hsa_kegg = TRUE})
+#' when \code{hsa_kegg = TRUE}) or \code{\link{visualize_term_interactions}}
+#' (used when \code{hsa_kegg = FALSE})
 #'
 #' @return Depending on the argument \code{hsa_KEGG}, creates visualization of
 #'  interactions of genes involved in the list of enriched terms in
@@ -73,7 +74,8 @@ visualize_terms <- function(result_df, input_processed = NULL,
                        ...)
   } else {
     visualize_term_interactions(result_df = result_df,
-                                pin_name_path = pin_name_path)
+                                pin_name_path = pin_name_path,
+                                ...)
   }
 }
 
@@ -82,6 +84,8 @@ visualize_terms <- function(result_df, input_processed = NULL,
 #' @param result_df Data frame of enrichment results. Must-have columns
 #' are: "Term_Description", "Up_regulated" and "Down_regulated"
 #' @inheritParams return_pin_path
+#' @param show_legend Boolean to indicate whether to display the legend (\code{TRUE})
+#' or not (\code{FALSE}) (default: \code{TRUE})
 #'
 #' @return Creates PNG files visualizing the interactions of genes involved
 #' in the given enriched terms (annotated in the \code{result_df}) in the PIN used
@@ -108,7 +112,7 @@ visualize_terms <- function(result_df, input_processed = NULL,
 #' \dontrun{
 #' visualize_term_interactions(result_df, pin_name_path = "IntAct")
 #' }
-visualize_term_interactions <- function(result_df, pin_name_path) {
+visualize_term_interactions <- function(result_df, pin_name_path, show_legend = TRUE) {
   ############ Initial Steps
   ## fix naming issue
   result_df$Term_Description <- gsub("\\/", "-", result_df$Term_Description)
@@ -180,8 +184,8 @@ visualize_term_interactions <- function(result_df, pin_name_path) {
       cond1 <- names(igraph::V(g)) %in% up_genes
       cond2 <- names(igraph::V(g)) %in% down_genes
       cond3 <- names(igraph::V(g)) %in% snw_genes
-      igraph::V(g)$color <- ifelse(cond1, "red",
-                                   ifelse(cond2, "green",
+      igraph::V(g)$color <- ifelse(cond1, "green",
+                                   ifelse(cond2, "red",
                                           ifelse(cond3, "blue", "gray60")))
 
       #### Generate diagram
@@ -201,21 +205,23 @@ visualize_term_interactions <- function(result_df, pin_name_path) {
                                        "\n Involved Gene Interactions in",
                                        pin_name_path))
 
-      if (is.null(snw_genes)) {
-        graphics::legend("topleft",
-                         legend = c("Upregulated Input Genes",
-                                    "Downregulated Input Genes",
-                                    "Other"),
-                         col = c("red", "green", "gray60"),
-                         pch = 19, cex = 1.5, bty = "n")
-      } else {
-        graphics::legend("topleft",
-                         legend = c("Non-input Active Snw. Genes",
-                                    "Upregulated Input Genes",
-                                    "Downregulated Input Genes",
-                                    "Other"),
-                         col = c("blue", "red", "green", "gray60"),
-                         pch = 19, cex = 1.5, bty = "n")
+      if (show_legend) {
+        if (is.null(snw_genes)) {
+          graphics::legend("topleft",
+                           legend = c("Upregulated Input Genes",
+                                      "Downregulated Input Genes",
+                                      "Other"),
+                           col = c("green", "red", "gray60"),
+                           pch = 19, cex = 1.5, bty = "n")
+        } else {
+          graphics::legend("topleft",
+                           legend = c("Non-input Active Snw. Genes",
+                                      "Upregulated Input Genes",
+                                      "Downregulated Input Genes",
+                                      "Other"),
+                           col = c("blue", "green", "red", "gray60"),
+                           pch = 19, cex = 1.5, bty = "n")
+        }
       }
       grDevices::dev.off()
 
@@ -273,7 +279,7 @@ visualize_term_interactions <- function(result_df, pin_name_path) {
 #' visualize_hsa_KEGG(hsa_kegg_ids, input_processed)
 #' }
 visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed, max_to_plot = NULL,
-                               normalize_vals = FALSE, node_cols = NULL,
+                               scale_vals = TRUE, node_cols = NULL,
                                quiet = TRUE,
                                key_gravity = "northeast",
                                logo_gravity = "southeast") {
@@ -339,7 +345,7 @@ visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed, max_to_plot = NULL
 
     pw_vis_list[[pw_id]] <- color_kegg_pathway(pw_id = pw_id,
                                                change_vec = change_vec,
-                                               normalize_vals = normalize_vals,
+                                               scale_vals = scale_vals,
                                                node_cols = node_cols,
                                                quiet = quiet)
 
@@ -429,7 +435,7 @@ visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed, max_to_plot = NULL
 #'
 #' @param pw_id hsa KEGG pathway id (e.g. hsa05012)
 #' @param change_vec vector of change values, names should be hsa KEGG gene ids
-#' @param normalize_vals should change values be normalized (default = \code{FALSE})
+#' @param scale_vals should change values be scaled? (default = \code{TRUE})
 #' @param node_cols low, middle and high color values for coloring the pathway nodes
 #' (default = \code{NULL}). If \code{node_cols=NULL}, the low, middle and high color
 #' are set as "green", "gray" and "red". If all change values are 1e6 (in case no
@@ -451,11 +457,11 @@ visualize_hsa_KEGG <- function(hsa_kegg_ids, input_processed, max_to_plot = NULL
 #'    names(change_vec) <- c("hsa:2821", "hsa:226", "hsa:229")
 #'    result <- pathfindR:::color_kegg_pathway(pw_id, change_vec)
 #' }
-color_kegg_pathway <- function(pw_id, change_vec, normalize_vals = FALSE,
+color_kegg_pathway <- function(pw_id, change_vec, scale_vals = TRUE,
                                node_cols = NULL, quiet = TRUE) {
   ############ Arg checks
-  if (!is.logical(normalize_vals)) {
-    stop("`normalize_vals` should be logical")
+  if (!is.logical(scale_vals)) {
+    stop("`scale_vals` should be logical")
   }
 
   ## check node_cols
@@ -491,9 +497,9 @@ color_kegg_pathway <- function(pw_id, change_vec, normalize_vals = FALSE,
   } else if (all(change_vec == 1e6)) { ## NO CHANGES SUPPLIED
     low_col <- mid_col <- high_col <- "#F38F18"
   } else {
-    low_col <- "green"
+    low_col <- "red"
     mid_col <- "gray"
-    high_col <- "red"
+    high_col <- "green"
   }
 
   ############ Summarization for genes that are in the same node
@@ -564,9 +570,21 @@ color_kegg_pathway <- function(pw_id, change_vec, normalize_vals = FALSE,
 
   ############ Determine node colors
   vals <- pw_vis_changes[!is.na(pw_vis_changes)]
-  ### Normalization
-  if (!all(vals == 1e6) & normalize_vals) {
-    vals <- 2 * (vals - min(vals)) / diff(range(vals)) - 1
+  ### Scaling
+  if (!all(vals == 1e6) & scale_vals) {
+    pos_idx <- which(vals >= 0)
+    neg_idx <- which(vals < 0)
+
+    UL <- max(abs(vals))
+
+    pos_vals <- c(UL, vals[pos_idx])
+    pos_vals <- (pos_vals - min(pos_vals)) / diff(range(pos_vals))
+
+    neg_vals <- c(-UL, vals[neg_idx])
+    neg_vals <- (neg_vals - min(neg_vals)) / diff(range(neg_vals)) - 1
+
+    vals[pos_idx] <- pos_vals[-1]
+    vals[neg_idx] <- neg_vals[-1]
   }
 
   ### determine limit
@@ -648,6 +666,11 @@ obtain_KEGGML_URL <- function(pw_id, pwKGML, quiet = TRUE) {
     message(paste("Cannot download KGML file for:", pw_id))
     message("Here's the original error message:")
     message(e$message)
+    return(NA)
+  }, warning = function(w) {
+    message(paste("Cannot download KGML file for:", pw_id))
+    message("Here's the original error message:")
+    message(w$message)
     return(NA)
   })
   return(KGML_URL)
@@ -1017,6 +1040,9 @@ term_gene_graph <- function(result_df, num_terms = 10,
 #'  all enriched terms (default = 10)
 #' @inheritParams term_gene_graph
 #' @inheritParams plot_scores
+#' @param legend_title legend title (defaut = "change")
+#' @param sort_terms_by_p boolean to indicate whether to sort terms by 'lowest_p'
+#' (\code{TRUE}) or by number of genes (\code{FALSE}) (default = \code{FALSE})
 #' @param ... additional arguments for \code{\link{input_processing}} (used if
 #' \code{genes_df} is provided)
 #'
@@ -1029,7 +1055,9 @@ term_gene_graph <- function(result_df, num_terms = 10,
 #' term_gene_heatmap(RA_output, num_terms = 3)
 term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
                               use_description = FALSE,
-                              low = "green", mid = "black", high = "red",
+                              low = "red", mid = "black", high = "green",
+                              legend_title = "change",
+                              sort_terms_by_p = FALSE,
                               ...) {
 
   ############ Arg checks
@@ -1135,15 +1163,31 @@ term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
 
   bg_df <- expand.grid(Enriched_Term = all_terms,
                        Symbol = all_genes)
-  bg_df$Enriched_Term <- factor(bg_df$Enriched_Term, levels = rev(rownames(term_genes_mat)))
+  if (sort_terms_by_p) {
+    bg_df$Enriched_Term <- factor(bg_df$Enriched_Term, levels = rev(result_df[, ID_column]))
+  } else {
+    bg_df$Enriched_Term <- factor(bg_df$Enriched_Term, levels = rev(rownames(term_genes_mat)))
+  }
+
+
   bg_df$Symbol <- factor(bg_df$Symbol, levels = colnames(term_genes_mat))
 
   if (!missing(genes_df)) {
+
     for (i in seq_len(nrow(term_genes_df))) {
       if (!is.na(term_genes_df$value[i])) {
-        term_genes_df$value[i] <- genes_df$CHANGE[genes_df$GENE == term_genes_df$Symbol[i]]
+        if (all(genes_df$CHANGE == 1e6)) {
+          term_genes_df$value[i] <- ifelse(term_genes_df$Symbol[i] %in% up_genes[[as.character(term_genes_df$Enriched_Term[i])]], 1, -1)
+        } else {
+          term_genes_df$value[i] <- genes_df$CHANGE[genes_df$GENE == term_genes_df$Symbol[i]]
+        }
       }
     }
+
+    if (all(genes_df$CHANGE == 1e6)) {
+      term_genes_df$value <- factor(term_genes_df$value, levels = c(-1, 1))
+    }
+
   } else {
     for (i in seq_len(nrow(term_genes_df))) {
       if (!is.na(term_genes_df$value[i])) {
@@ -1152,6 +1196,7 @@ term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
     }
 
   }
+
   g <- ggplot2::ggplot(bg_df, ggplot2::aes_(x = ~Symbol, y = ~Enriched_Term))
   g <- g + ggplot2::geom_tile(fill = "white", color = "white")
   g <- g + ggplot2::theme(axis.ticks.y = ggplot2::element_blank(),
@@ -1163,14 +1208,17 @@ term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
                           panel.grid.major.y = ggplot2::element_blank(),
                           panel.grid.minor.x = ggplot2::element_blank(),
                           panel.grid.minor.y = ggplot2::element_blank(),
-                          panel.background = ggplot2::element_rect(fill="#ffffff"),
-                          legend.title = ggplot2::element_blank())
+                          panel.background = ggplot2::element_rect(fill="#ffffff"))
   g <- g + ggplot2::geom_tile(data = term_genes_df,
                               ggplot2::aes_(fill = ~value), color = "gray60")
   if (!missing(genes_df)) {
-    g <- g + ggplot2::scale_fill_gradient2(low = low, mid = mid, high = high, na.value = "white")
+    if (all(genes_df$CHANGE == 1e6)) {
+      g <- g + ggplot2::scale_fill_manual(values = c(low, high), na.value ="white", name = legend_title)
+    } else {
+      g <- g + ggplot2::scale_fill_gradient2(low = low, mid = mid, high = high, na.value = "white", name = legend_title)
+    }
   } else {
-    g <- g + ggplot2::scale_fill_manual(values = c(low, high), na.value ="white")
+    g <- g + ggplot2::scale_fill_manual(values = c(low, high), na.value ="white", name = legend_title)
   }
   return(g)
 }
@@ -1199,7 +1247,7 @@ term_gene_heatmap <- function(result_df, genes_df, num_terms = 10,
 UpSet_plot <- function(result_df, genes_df, num_terms = 10,
                        method = "heatmap",
                        use_description = FALSE,
-                       low = "green", mid = "black", high = "red",
+                       low = "red", mid = "black", high = "green",
                        ...) {
   ############ Arg checks
   if (!is.logical(use_description)) {

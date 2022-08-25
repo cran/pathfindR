@@ -9,9 +9,11 @@ term_gene_heatmap(
   genes_df,
   num_terms = 10,
   use_description = FALSE,
-  low = "green",
+  low = "red",
   mid = "black",
-  high = "red",
+  high = "green",
+  legend_title = "change",
+  sort_terms_by_p = FALSE,
   ...
 )
 }
@@ -42,6 +44,11 @@ all enriched terms (default = 10)}
 \item{mid}{a string indicating the color of 'mid' values in the coloring gradient (default = 'black')}
 
 \item{high}{a string indicating the color of 'high' values in the coloring gradient (default = 'red')}
+
+\item{legend_title}{legend title (defaut = "change")}
+
+\item{sort_terms_by_p}{boolean to indicate whether to sort terms by 'lowest_p'
+(\code{TRUE}) or by number of genes (\code{FALSE}) (default = \code{FALSE})}
 
 \item{...}{additional arguments for \code{\link{input_processing}} (used if
 \code{genes_df} is provided)}

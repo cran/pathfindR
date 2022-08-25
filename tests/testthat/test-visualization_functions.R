@@ -2,7 +2,7 @@
 ## Project: pathfindR
 ## Script purpose: Testthat testing script for
 ## visualization-related functions
-## Date: Nov 9, 2021
+## Date: Jun 29, 2022
 ## Author: Ege Ulgen
 ##################################################
 
@@ -107,7 +107,7 @@ test_that("`visualize_hsa_KEGG()` creates expected png file(s)", {
                                  paste0(tmp_res$ID, "_pathfindR.png"))
 
   ###### Continuous change values
-  ### Normalize = FALSE
+  ### scale_vals = TRUE
   expect_null(visualize_hsa_KEGG(hsa_kegg_ids = tmp_res$ID,
                                  input_processed = input_processed))
   expect_true(file.exists(expected_out_file))
@@ -119,10 +119,10 @@ test_that("`visualize_hsa_KEGG()` creates expected png file(s)", {
   expect_true(file.exists(expected_out_file))
   unlink("term_visualizations", recursive = TRUE)
 
-  ### Normalize = TRUE
+  ### scale_vals = FALSE
   expect_null(visualize_hsa_KEGG(hsa_kegg_ids = tmp_res$ID,
                                  input_processed = input_processed,
-                                 normalize_vals = TRUE))
+                                 scale_vals = FALSE))
   expect_true(file.exists(expected_out_file))
   unlink("term_visualizations", recursive = TRUE)
 
@@ -143,7 +143,7 @@ test_that("`visualize_hsa_KEGG()` creates expected png file(s)", {
 
 
   ###### max_to_plot works
-  max_n <- 5
+  max_n <- 2
   expected_out_files <- file.path("term_visualizations",
                                   paste0(RA_output$ID[seq_len(max_n)],
                                          "_pathfindR.png"))
@@ -153,29 +153,26 @@ test_that("`visualize_hsa_KEGG()` creates expected png file(s)", {
   expect_true(all(file.exists(expected_out_files)))
   unlink("term_visualizations", recursive = TRUE)
 
-  visualize_hsa_KEGG(hsa_kegg_ids = c(RA_output$ID[1], "hsa00920"),
-                     input_processed = input_processed)
-
   ###### skips NULL
   temp_res <- RA_output[1:2, ]
-  temp_res$ID[1] <- "hsa12345"
+  temp_res$ID[2] <- "hsa12345"
   expect_null(visualize_hsa_KEGG(hsa_kegg_ids = temp_res$ID,
                                  input_processed = input_processed))
   expect_true(file.exists(file.path("term_visualizations",
-                                    paste0(temp_res$ID[2],
+                                    paste0(temp_res$ID[1],
                                            "_pathfindR.png"))))
   unlink("term_visualizations", recursive = TRUE)
 })
 
-temp_ids <- RA_output$ID[1:3]
+temp_ids <- RA_output$ID[1:2]
 test_that("KEGML download error is handled properly", {
   skip_on_cran()
-  temp_ids[2] <- "hsa00000"
+  temp_ids[2] <- "hsa12345"
   expected_out_files <- file.path("term_visualizations",
                                   paste0(temp_ids, "_pathfindR.png"))
   visualize_hsa_KEGG(hsa_kegg_ids = temp_ids,
                      input_processed = input_processed)
-  expect_equal(file.exists(expected_out_files), c(TRUE, FALSE, TRUE))
+  expect_equal(file.exists(expected_out_files), c(TRUE, FALSE))
   unlink("term_visualizations", recursive = TRUE)
 })
 
@@ -207,8 +204,8 @@ test_that("arg checks for `visualize_hsa_KEGG()` work", {
 
   expect_error(visualize_hsa_KEGG(hsa_kegg_ids = tmp_res$ID,
                                   input_processed = input_processed,
-                                  normalize_vals = "INVALID"),
-               "`normalize_vals` should be logical")
+                                  scale_vals = "INVALID"),
+               "`scale_vals` should be logical")
 
   expect_error(visualize_hsa_KEGG(hsa_kegg_ids = tmp_res$ID,
                                   input_processed = input_processed,
@@ -417,6 +414,12 @@ test_that("`term_gene_heatmap()` produces a ggplot object using the correct data
 
   # genes_df supplied
   expect_is(p <- term_gene_heatmap(RA_output[1:3, ], RA_input), "ggplot")
+
+  # genes_df supplied - wihout change column
+  expect_is(p <- term_gene_heatmap(RA_output[1:3, ], RA_input[, -2]), "ggplot")
+
+  # sort by lowest_p instead
+  expect_is(p <- term_gene_heatmap(RA_output[1:3, ], RA_input, sort_terms_by_p = TRUE), "ggplot")
 })
 
 test_that("`term_gene_graph()` arg checks work", {

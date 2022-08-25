@@ -1,3 +1,16 @@
+# pathfindR 1.6.4
+
+## Minor Changes
+- updated the alias selection function within `input_processing()` so that an alias that is not already present is selected
+- updated the min-max scaling (controlled by `scale_vals`) in `color_kegg_pathway()`, the default is now `scale_vals=TRUE`
+- updated the `term_gene_heatmap()` function so that legend title is shown and can be customized
+- updated the `term_gene_heatmap()` function so that coloring is proper when no change values are provided in `genes_df`
+- added the `sort_terms_by_p` argument to the `term_gene_heatmap()` function to enable sorting of terms by 'lowest_p'
+- in visualization functions, made coloring of up-/down-regrulated genes consistent (#126)
+- added the `vertex.label.cex` and `vertex.size.scaling` arguments to `cluster_graph_vis()`
+- added the `show_legend` argument to `visualize_term_interactions()` to toggle the legend
+
+
 # pathfindR 1.6.3
 
 ## Minor Changes

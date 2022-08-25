@@ -392,7 +392,7 @@ run_pathfindR <- function(input,
 #'  If "Custom", the arguments \code{custom_genes} and \code{custom_descriptions}
 #'  must be specified. (Default = "KEGG")
 #' @param min_gset_size minimum number of genes a term must contain (default = 10)
-#' @param max_gset_size maximum number of genes a term must contain (default = 10)
+#' @param max_gset_size maximum number of genes a term must contain (default = 300)
 #' @param custom_genes a list containing the genes involved in each custom
 #'  term. Each element is a vector of gene symbols located in the given custom
 #'  term. Names should correspond to the IDs of the custom terms.
@@ -526,7 +526,7 @@ fetch_gene_set <- function(gene_sets = "KEGG",
 #' interactors' gene symbols, column 2 must be a column with all
 #' rows consisting of "pp".
 #'
-#' @param pin_name_path Name of the chosen PIN or path/to/PIN.sif. If PIN name,
+#' @param pin_name_path Name of the chosen PIN or absolute/path/to/PIN.sif. If PIN name,
 #'   must be one of c("Biogrid", "STRING", "GeneMania", "IntAct", "KEGG", "mmu_STRING"). If
 #'   path/to/PIN.sif, the file must comply with the PIN specifications. (Default = "Biogrid")
 #'
@@ -732,6 +732,7 @@ input_processing <- function(input, p_val_threshold = 0.05,
   ## Genes not in pin
   PIN_genes <- c(base::toupper(pin[, 1]), base::toupper(pin[, 3]))
   missing_symbols <- input$GENE[!base::toupper(input$GENE) %in% PIN_genes]
+  non_missing_symbols <- input$GENE[base::toupper(input$GENE) %in% PIN_genes]
 
   if (convert2alias & length(missing_symbols) != 0) {
     ## use SQL to get alias table and gene_info table (contains the symbols)
@@ -744,13 +745,13 @@ input_processing <- function(input, p_val_threshold = 0.05,
     hsa_alias_df <- DBI::dbGetQuery(db_con, sql_query)
 
     select_alias <- function(result, converted, idx) {
-      if (idx == 0) {
-        return("NOT_FOUND")
-      } else if (result[idx] %in% converted[, 2]) {
-        return(result[idx - 1])
-      } else {
-        return(result[idx])
+      while (idx > 0) {
+        if (!result[idx] %in% c(converted[, 2], non_missing_symbols)) {
+          return(result[idx])
+        }
+        idx <- idx - 1
       }
+      return("NOT_FOUND")
     }
 
     ## loop for getting all symbols
