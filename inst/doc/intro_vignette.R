@@ -1,120 +1,150 @@
 ## ----setup, include = FALSE---------------------------------------------------
-knitr::opts_chunk$set(collapse = TRUE,
-                      comment = "#>",
-                      eval = FALSE,
-                      fig.width = 7, fig.height = 7, fig.align = "center")
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE,
+  fig.width = 7, fig.height = 7, fig.align = "center"
+)
 suppressPackageStartupMessages(library(pathfindR))
 
 ## ----load_pkg, eval=TRUE------------------------------------------------------
 library(pathfindR)
-knitr::kable(head(RA_input))
+knitr::kable(head(example_pathfindR_input))
 
 ## ----run_pathfindR------------------------------------------------------------
-#  output_df <- run_pathfindR(input_df)
+#  output_df <- run_pathfindR(example_pathfindR_input)
 
 ## ----change_input_thr---------------------------------------------------------
-#  output_df <- run_pathfindR(input_df, p_val_threshold = 0.01)
+#  output_df <- run_pathfindR(example_pathfindR_input, p_val_threshold = 0.01)
 
 ## ----change_out_dir-----------------------------------------------------------
-#  output_df <- run_pathfindR(input_df, output_dir = "this_is_my_output_directory")
+#  output_df <- run_pathfindR(example_pathfindR_input, output_dir = "this_is_my_output_directory")
 
 ## ----change_out_dir2----------------------------------------------------------
-#  output_df <- run_pathfindR(input_df, output_dir = "~/Desktop/my_dir")
+#  output_df <- run_pathfindR(example_pathfindR_input, output_dir = "~/Desktop/my_dir")
 
 ## ----change_gset1-------------------------------------------------------------
-#  output_df <- run_pathfindR(input_df, gene_sets = "GO-MF")
+#  output_df <- run_pathfindR(example_pathfindR_input, gene_sets = "GO-MF")
 
 ## ----change_gset2-------------------------------------------------------------
 #  ## Including more terms for enrichment analysis
-#  output_df <- run_pathfindR(input_df,
-#                             gene_sets = "GO-MF",
-#                             min_gset_size = 5,
-#                             max_gset_size = 500)
+#  output_df <- run_pathfindR(example_pathfindR_input,
+#    gene_sets = "GO-MF",
+#    min_gset_size = 5,
+#    max_gset_size = 500
+#  )
 
 ## ----change_enr_threshold-----------------------------------------------------
-#  output_df <- run_pathfindR(input_df,
-#                             adj_method = "fdr",
-#                             enrichment_threshold = 0.01)
+#  output_df <- run_pathfindR(example_pathfindR_input,
+#    adj_method = "fdr",
+#    enrichment_threshold = 0.01
+#  )
 
 ## ----change_PIN1--------------------------------------------------------------
-#  output_df <- run_pathfindR(input_df, pin_name_path = "IntAct")
+#  output_df <- run_pathfindR(example_pathfindR_input, pin_name_path = "IntAct")
 
 ## ----change_PIN2--------------------------------------------------------------
 #  # to use an external PIN of your choice
-#  output_df <- run_pathfindR(input_df, pin_name_path = "/path/to/myPIN.sif")
+#  output_df <- run_pathfindR(example_pathfindR_input, pin_name_path = "/path/to/myPIN.sif")
 
 ## ----change_method------------------------------------------------------------
 #  # for simulated annealing:
-#  output_df <- run_pathfindR(input_df, search_method = "SA")
+#  output_df <- run_pathfindR(example_pathfindR_input, search_method = "SA")
 #  # for genetic algorithm:
-#  output_df <- run_pathfindR(input_df, search_method = "GA")
+#  output_df <- run_pathfindR(example_pathfindR_input, search_method = "GA")
 
 ## ----change_n_iters-----------------------------------------------------------
-#  output_df <- run_pathfindR(input_df, iterations = 25)
+#  output_df <- run_pathfindR(example_pathfindR_input, iterations = 25)
 
 ## ----change_n_proc------------------------------------------------------------
-#  # if not set, n_processes defaults to (number of detected cores - 1)
-#  output_df <- run_pathfindR(input_df, iterations = 5, n_processes = 2)
+#  # if not set, `n_processes` defaults to (number of detected cores - 1)
+#  output_df <- run_pathfindR(example_pathfindR_input, iterations = 5, n_processes = 2)
 
 ## ----example_out, eval=TRUE---------------------------------------------------
-knitr::kable(head(RA_output, 2))
+knitr::kable(head(example_pathfindR_output, 2))
 
 ## ----encrichment_plot_shown---------------------------------------------------
 #  # change number of top terms plotted (default = 10)
-#  enrichment_chart(result_df = RA_output,
-#                   top_terms = 15)
+#  enrichment_chart(
+#    result_df = example_pathfindR_output,
+#    top_terms = 15
+#  )
+
+## ----KEGG_vis, eval=FALSE-----------------------------------------------------
+#  input_processed <- input_processing(example_pathfindR_input)
+#  visualize_terms(
+#    result_df = example_pathfindR_output,
+#    input_processed = input_processed,
+#    hsa_KEGG = TRUE
+#  )
+
+## ----nonKEGG_viss, eval=FALSE-------------------------------------------------
+#  input_processed <- input_processing(example_pathfindR_input)
+#  visualize_terms(
+#    result_df = example_pathfindR_output,
+#    input_processed = input_processed,
+#    hsa_KEGG = FALSE,
+#    pin_name_path = "Biogrid"
+#  )
 
 ## ----hierarchical0------------------------------------------------------------
-#  RA_clustered <- cluster_enriched_terms(RA_output, plot_dend = FALSE, plot_clusters_graph = FALSE)
+#  example_pathfindR_output_clustered <- cluster_enriched_terms(example_pathfindR_output, plot_dend = FALSE, plot_clusters_graph = FALSE)
 
 ## ----hierarchical1, eval=TRUE-------------------------------------------------
 ## First 2 rows of clustered data frame
-knitr::kable(head(RA_clustered, 2))
+knitr::kable(head(example_pathfindR_output_clustered, 2))
 ## The representative terms
-knitr::kable(RA_clustered[RA_clustered$Status == "Representative", ])
+knitr::kable(example_pathfindR_output_clustered[example_pathfindR_output_clustered$Status == "Representative", ])
 
 ## ----hierarchical2, eval=TRUE-------------------------------------------------
 # plotting only selected clusters for better visualization
-RA_selected <- subset(RA_clustered, Cluster %in% 5:7)
-enrichment_chart(RA_selected, plot_by_cluster = TRUE)
+selected_clusters <- subset(example_pathfindR_output_clustered, Cluster %in% 5:7)
+enrichment_chart(selected_clusters, plot_by_cluster = TRUE)
 
 ## ----fuzzy--------------------------------------------------------------------
-#  RA_clustered_fuzzy <- cluster_enriched_terms(RA_output, method = "fuzzy")
+#  clustered_fuzzy <- cluster_enriched_terms(example_pathfindR_output, method = "fuzzy")
 
 ## ----hmap1--------------------------------------------------------------------
-#  term_gene_heatmap(result_df = RA_output, genes_df = RA_input)
+#  term_gene_heatmap(result_df = example_pathfindR_output, genes_df = example_pathfindR_input)
 
 ## ----term_gene_graph----------------------------------------------------------
-#  term_gene_graph(result_df = RA_output, use_description = TRUE)
+#  term_gene_graph(result_df = example_pathfindR_output, use_description = TRUE)
 
 ## ----upset--------------------------------------------------------------------
-#  UpSet_plot(result_df = RA_output, genes_df = RA_input)
+#  UpSet_plot(result_df = example_pathfindR_output, genes_df = example_pathfindR_input)
 
 ## ----scores, eval=TRUE, fig.height=4, fig.width=8-----------------------------
 ## Vector of "Case" IDs
-cases <- c("GSM389703", "GSM389704", "GSM389706", "GSM389708", 
-           "GSM389711", "GSM389714", "GSM389716", "GSM389717", 
-           "GSM389719", "GSM389721", "GSM389722", "GSM389724", 
-           "GSM389726", "GSM389727", "GSM389730", "GSM389731", 
-           "GSM389733", "GSM389735")
+cases <- c(
+  "GSM389703", "GSM389704", "GSM389706", "GSM389708",
+  "GSM389711", "GSM389714", "GSM389716", "GSM389717",
+  "GSM389719", "GSM389721", "GSM389722", "GSM389724",
+  "GSM389726", "GSM389727", "GSM389730", "GSM389731",
+  "GSM389733", "GSM389735"
+)
 
-## Calculate scores for representative terms 
+## Calculate scores for representative terms
 ## and plot heat map using term descriptions
-score_matrix <- score_terms(enrichment_table = RA_clustered[RA_clustered$Status == "Representative", ],
-                            exp_mat = RA_exp_mat,
-                            cases = cases,
-                            use_description = TRUE, # default FALSE
-                            label_samples = FALSE, # default = TRUE
-                            case_title = "RA",  # default = "Case"
-                            control_title = "Healthy", # default = "Control"
-                            low = "#f7797d", # default = "green"
-                            mid = "#fffde4", # default = "black"
-                            high = "#1f4037") # default = "red"
+representative_df <- example_pathfindR_output_clustered[example_pathfindR_output_clustered$Status == "Representative", ]
+score_matrix <- score_terms(
+  enrichment_table = representative_df,
+  exp_mat = example_experiment_matrix,
+  cases = cases,
+  use_description = TRUE, # default FALSE
+  label_samples = FALSE, # default = TRUE
+  case_title = "RA", # default = "Case"
+  control_title = "Healthy", # default = "Control"
+  low = "#f7797d", # default = "green"
+  mid = "#fffde4", # default = "black"
+  high = "#1f4037" # default = "red"
+)
 
 ## ----compare2res, eval=TRUE, fig.height=4, fig.width=8------------------------
-combined_df <- combine_pathfindR_results(result_A = RA_output, 
-                                         result_B = RA_comparison_output, 
-                                         plot_common = FALSE)
+combined_df <- combine_pathfindR_results(
+  result_A = example_pathfindR_output,
+  result_B = example_comparison_output,
+  plot_common = FALSE
+)
 
 ## ----custom_prep, eval=TRUE---------------------------------------------------
 ## CREB target genes
@@ -134,28 +164,35 @@ set.seed(123)
 
 ## Select 40 random genes from MYC gene sets and 10 from CREB gene sets
 selected_genes <- sample(MYC_target_genes, 40)
-selected_genes <- c(selected_genes, 
-                    sample(CREB_target_genes, 10))
+selected_genes <- c(
+  selected_genes,
+  sample(CREB_target_genes, 10)
+)
 
 ## Assign random p value between 0.001 and 0.05 for each selected gene
 rand_p_vals <- sample(seq(0.001, 0.05, length.out = 5),
-                      size = length(selected_genes),
-                      replace = TRUE)
+  size = length(selected_genes),
+  replace = TRUE
+)
 
-input_df <- data.frame(Gene_symbol = selected_genes,
-                       p_val = rand_p_vals)
-knitr::kable(head(input_df))
+example_pathfindR_input <- data.frame(
+  Gene_symbol = selected_genes,
+  p_val = rand_p_vals
+)
+knitr::kable(head(example_pathfindR_input))
 
 ## ----custom_run---------------------------------------------------------------
-#  custom_result <- run_pathfindR(input_df,
-#                                 gene_sets = "Custom",
-#                                 custom_genes = custom_genes,
-#                                 custom_descriptions = custom_descriptions,
-#                                 max_gset_size = Inf, # DO NOT LIMIT GENE SET SIZE
-#                                 output_dir = "misc/v1.4/CREB_MYC")
+#  example_custom_genesets_result <- run_pathfindR(
+#    example_pathfindR_input,
+#    gene_sets = "Custom",
+#    custom_genes = custom_genes,
+#    custom_descriptions = custom_descriptions,
+#    max_gset_size = Inf, # DO NOT LIMIT GENE SET SIZE
+#    output_dir = "misc/CREB_MYC"
+#  )
 #  
-#  knitr::kable(custom_result)
+#  knitr::kable(example_custom_genesets_result)
 
 ## ----custom_result1, eval=TRUE, echo=FALSE------------------------------------
-knitr::kable(custom_result)
+knitr::kable(example_custom_genesets_result)
 

@@ -1,3 +1,17 @@
+# pathfindR 2.0.0
+
+## Major Changes
+- updated the java active subnetwork search component and added the `seedForRandom` argument in `active_snw_search()`to ensure reproducibility. By default behavior, in `run_pathfindR()`, a seed is set for each iteration to produce reproducible results (#108)
+- as the example input/output data were renamed for convenience in 'pathfindR.data' v2.0, 'pathfindR' now depends on pathfindR.data (>= 2.0) 
+- refactored/simplified `run_pathfindR()`
+- visualization enriched term diagrams are now NOT part of `run_pathfindR()`
+- default behavior of `run_pathfindR()` is now to run in a temporary directory. The user can still set `output_dir` to run in a specified directory and also produce HTML reports
+- in `hierarchical_term_clustering()`, update the sequence of number of clusters for which silhouette width is calculated for choosing the optimal number of clusters. This should speed up the function for cases with a large number of enriched terms
+- updated the relevant vignettes to reflect the implemented changes
+
+## Minor Changes
+- fixed a minor issue in `return_pin_path()` where the PIN was not properly read (#157)
+
 # pathfindR 1.6.4
 
 ## Minor Changes

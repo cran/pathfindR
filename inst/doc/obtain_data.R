@@ -19,8 +19,10 @@ knitr::opts_chunk$set(
 
 ## -----------------------------------------------------------------------------
 #  ## retrieving PIN data for "Mus_musculus" from BioGRID release 3.5.179
-#  path_to_pin_file <- get_pin_file(org = "Mus_musculus",
-#                                   release = "3.5.179")
+#  path_to_pin_file <- get_pin_file(
+#    org = "Mus_musculus",
+#    release = "3.5.179"
+#  )
 
 ## -----------------------------------------------------------------------------
 #  ## obtaining KEGG pathway gene sets for Rattus norvegicus (rno)
@@ -30,14 +32,18 @@ knitr::opts_chunk$set(
 #  gsets_list <- get_gene_sets_list(source = "Reactome")
 
 ## -----------------------------------------------------------------------------
-#  gsets_list <- get_gene_sets_list(source = "MSigDB",
-#                                   collection = "C2")
+#  gsets_list <- get_gene_sets_list(
+#    source = "MSigDB",
+#    collection = "C2"
+#  )
 
 ## -----------------------------------------------------------------------------
 #  ## obtaining C5 gene sets data for "Drosophila melanogaster"
-#  gsets_list <- get_gene_sets_list(source = "MSigDB",
-#                                   species = "Drosophila melanogaster",
-#                                   collection = "C5")
+#  gsets_list <- get_gene_sets_list(
+#    source = "MSigDB",
+#    species = "Drosophila melanogaster",
+#    collection = "C5"
+#  )
 
 ## ---- eval=TRUE---------------------------------------------------------------
 ## see msigdbr::msigdbr_show_species() for all available organisms
@@ -45,7 +51,9 @@ msigdbr::msigdbr_show_species()
 
 ## -----------------------------------------------------------------------------
 #  ## obtaining C3 - MIR: microRNA targets
-#  gsets_list <- get_gene_sets_list(source = "MSigDB",
-#                                   collection = "C3",
-#                                   subcollection = "MIR")
+#  gsets_list <- get_gene_sets_list(
+#    source = "MSigDB",
+#    collection = "C3",
+#    subcollection = "MIR"
+#  )
 

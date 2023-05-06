@@ -10,16 +10,18 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE,
-                      comment = "#>",
-                      eval = FALSE,
-                      fig.width = 7, fig.height = 7, fig.align = "center")
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE,
+  fig.width = 7, fig.height = 7, fig.align = "center"
+)
 suppressPackageStartupMessages(library(pathfindR))
 ```
 
-`pathfindR` is a tool for enrichment analysis via active subnetworks. The package also offers functionalities to cluster the enriched terms and identify representative terms in each cluster, to score the enriched terms per sample and to visualize analysis results.
+`pathfindR` is a tool for enrichment analysis via active subnetworks. The package also offers functionality to cluster the enriched terms and identify representative terms in each cluster, to score the enriched terms per sample and to visualize analysis results.
     
-The functionalities of pathfindR is described in detail in _Ulgen E, Ozisik O, Sezerman OU. 2019. pathfindR: An R Package for Comprehensive Identification of Enriched Pathways in Omics Data Through Active Subnetworks. Front. Genet. [https://doi.org/10.3389/fgene.2019.00858](https://doi.org/10.3389/fgene.2019.00858)_
+The functionality suite of pathfindR is described in detail in _Ulgen E, Ozisik O, Sezerman OU. 2019. pathfindR: An R Package for Comprehensive Identification of Enriched Pathways in Omics Data Through Active Subnetworks. Front. Genet. [https://doi.org/10.3389/fgene.2019.00858](https://doi.org/10.3389/fgene.2019.00858)_
 
 # Overview
 
@@ -27,11 +29,11 @@ The observation that motivated us to develop `pathfindR` was that direct enrichm
 
 > An active subnetwork can be defined as a group of interconnected genes in a PIN that predominantly consists of significantly altered genes. In other words, active subnetworks define distinct disease-associated sets of interacting genes, whether discovered through the original analysis or discovered because of being in interaction with a significant gene.
 
-The active-subnetwork-oriented enrichment analysis approach of pathfindR can be summarized as follows: Mapping the input genes with the associated p values onto the PIN (after processing the input), active subnetwork search is performed. The resulting active subnetworks are then filtered based on their scores and the number of significant genes they contain. This filtered list of active subnetworks are then used for enrichment analyses, i.e. using the genes in each of the active subnetworks, the significantly enriched terms (pathways/gene sets) are identified. Enriched terms with adjusted p values larger than the given threshold are discarded and the lowest adjusted p value (over all active subnetworks) for each term is kept. This process of `active subnetwork search + enrichment analyses` is repeated for a selected number of iterations, performed in parallel. Over all iterations, the lowest and the highest adjusted-p values, as well as number of occurrences over all iterations are reported for each significantly enriched term in the resulting data frame. An HTML report containing the results is also provided containing links to the visualizations of the enriched terms. This active-subnetwork-oriented enrichment approach is demonstrated in the section [Active-subnetwork-oriented Enrichment Analysis] of this vignette.
+The active-subnetwork-oriented enrichment analysis approach of pathfindR can be summarized as follows: Mapping the input genes with the associated p values onto the PIN (after processing the input), active subnetwork search is performed. The resulting active subnetworks are then filtered based on their scores and the number of significant genes they contain. This filtered list of active subnetworks are then used for enrichment analyses, i.e. using the genes in each of the active subnetworks, the significantly enriched terms (pathways/gene sets) are identified. Enriched terms with adjusted p values larger than the given threshold are discarded and the lowest adjusted p value (over all active subnetworks) for each term is kept. This process of `active subnetwork search + enrichment analyses` is repeated for a selected number of iterations, performed in parallel. Over all iterations, the lowest and the highest adjusted-p values, as well as number of occurrences over all iterations are reported for each significantly enriched term in the resulting data frame. This active-subnetwork-oriented enrichment approach is demonstrated in the section [Active-subnetwork-oriented Enrichment Analysis] of this vignette.
 
 The enrichment analysis usually yields a great number of enriched terms whose biological functions are related. Therefore, we implemented two clustering approaches using a pairwise distance matrix based on the kappa statistics between the enriched terms (as proposed by Huang et al. [^1]). Based on this distance metric, the user can perform either hierarchical (default) or fuzzy clustering of the enriched terms. Details of clustering and partitioning of enriched terms are presented in the [Clustering Enriched Terms] section of this vignette.
 
-Other functionalities of pathfindR including:
+Other functionality of pathfindR includes:
 
 - agglomerated score calculation per each term (to investigate how a gene set is altered in a given sample)
 - visualization of terms and term-related genes as a graph (to determine the degree of overlap between the enriched terms by identifying shared and/or distinct significant genes) and
@@ -41,13 +43,13 @@ Other functionalities of pathfindR including:
 
 <img src="./pathfindr.png" style="max-width:100%;" />
 
-For convenience, we provide  the wrapper function `run_pathfindR()` to be used for the active-subnetwork-oriented enrichment analysis. The input for this function must be a data frame consisting of the columns containing: `Gene Symbols`, `Change Values` (optional) and `p values`. The example data frame used in this vignette (`input_df`) is the dataset containing the differentially-expressed genes for the GEO dataset GSE15573 comparing 18 rheumatoid arthritis (RA) patients versus 15 healthy subjects.
+For convenience, we provide  the wrapper function `run_pathfindR()` to be used for the active-subnetwork-oriented enrichment analysis. The input for this function must be a data frame consisting of the columns containing: `Gene Symbols`, `Change Values` (optional) and `p values`. The example data frame used in this vignette (`example_pathfindR_input`) is the dataset containing the differentially-expressed genes for the GEO dataset GSE15573 comparing 18 rheumatoid arthritis (RA) patients versus 15 healthy subjects.
 
 The first 6 rows of the example input data frame are displayed below:
 
 ```{r load_pkg, eval=TRUE}
 library(pathfindR)
-knitr::kable(head(RA_input))
+knitr::kable(head(example_pathfindR_input))
 ```
 
 > For a detailed step-by-step explanation and an unwrapped demonstration of the active-subnetwork-oriented enrichment analysis, see the vignette [Step-by-Step Execution of the pathfindR Enrichment Workflow](manual_execution.html)
@@ -55,7 +57,7 @@ knitr::kable(head(RA_input))
 Executing the workflow is straightforward (but does typically take several minutes):
 
 ```{r run_pathfindR}
-output_df <- run_pathfindR(input_df)
+output_df <- run_pathfindR(example_pathfindR_input)
 ```
 
 ## Useful arguments
@@ -67,14 +69,15 @@ This subsection demonstrates some (selected) useful arguments of `run_pathfindR(
 By default, `run_pathfindR()` uses the input genes with p-values < 0.05. To change this threshold, use `p_val_threshold`:
 
 ```{r change_input_thr}
-output_df <- run_pathfindR(input_df, p_val_threshold = 0.01)
+output_df <- run_pathfindR(example_pathfindR_input, p_val_threshold = 0.01)
 ```
 
 ### Output Directory
-By default, `run_pathfindR()` creates a directory named `"pathfindR_Results"` under the current working directory for writing the output files. To change the output directory, use `output_dir`:
+
+By default, `run_pathfindR()` creates a temporary directory for writing the output files, including active subnetwork search results and a HTML report. To set the output directory, use `output_dir`:
 
 ```{r change_out_dir}
-output_df <- run_pathfindR(input_df, output_dir = "this_is_my_output_directory")
+output_df <- run_pathfindR(example_pathfindR_input, output_dir = "this_is_my_output_directory")
 ```
 
 This creates `"this_is_my_output_directory"` under the current working directory.
@@ -82,7 +85,7 @@ This creates `"this_is_my_output_directory"` under the current working directory
 In essence, this argument is treated as a path so it can be used to create the output directory anywhere. For example, to create the directory `"my_dir"` under `"~/Desktop"` and run the analysis there, you may run:
 
 ```{r change_out_dir2}
-output_df <- run_pathfindR(input_df, output_dir = "~/Desktop/my_dir")
+output_df <- run_pathfindR(example_pathfindR_input, output_dir = "~/Desktop/my_dir")
 ```
 
 > Note: If the output directory (e.g. `"my_dir"`) already exists, `run_pathfindR()` creates and works under `"my_dir(1)"`. If that exists also exists, it creates `"my_dir(2)"` and so on. This was intentionally implemented so that any previous pathfindR results are not overwritten.
@@ -92,17 +95,18 @@ output_df <- run_pathfindR(input_df, output_dir = "~/Desktop/my_dir")
 The active-subnetwork-oriented enrichment analyses can be performed on any gene sets (biological pathways, gene ontology terms, transcription factor target genes, miRNA target genes etc.). The available gene sets in pathfindR are "KEGG", "Reactome", "BioCarta", "GO-All", "GO-BP", "GO-CC" and "GO-MF" (all for Homo sapiens). For changing the default gene sets for enrichment analysis (hsa KEGG pathways), use the argument `gene_sets`
 
 ```{r change_gset1}
-output_df <- run_pathfindR(input_df, gene_sets = "GO-MF")
+output_df <- run_pathfindR(example_pathfindR_input, gene_sets = "GO-MF")
 ```
 
 By default, `run_pathfindR()` filters the gene sets by including only the terms containing at least 10 and at most 300 genes. To change the default behavior, you may change `min_gset_size` and `max_gset_size`:
 
 ```{r change_gset2}
 ## Including more terms for enrichment analysis
-output_df <- run_pathfindR(input_df, 
-                           gene_sets = "GO-MF",
-                           min_gset_size = 5,
-                           max_gset_size = 500)
+output_df <- run_pathfindR(example_pathfindR_input,
+  gene_sets = "GO-MF",
+  min_gset_size = 5,
+  max_gset_size = 500
+)
 ```
 
 > Note that increasing the number of terms for enrichment analysis may result in significantly longer run time.
@@ -116,9 +120,10 @@ For details on obtaining organism-specific Gene Sets and PIN data, see the vigne
 By default, `run_pathfindR()` adjusts the enrichment p values via the "bonferroni" method and filters the enriched terms by adjusted-p value < 0.05. To change this adjustment method and the threshold, set `adj_method` and `enrichment_threshold`, respectively:
 
 ```{r change_enr_threshold}
-output_df <- run_pathfindR(input_df, 
-                           adj_method = "fdr",
-                           enrichment_threshold = 0.01)
+output_df <- run_pathfindR(example_pathfindR_input,
+  adj_method = "fdr",
+  enrichment_threshold = 0.01
+)
 ```
 
 ### Protein-protein Interaction Network
@@ -126,14 +131,14 @@ output_df <- run_pathfindR(input_df,
 For the active subnetwork search process, a protein-protein interaction network (PIN) is used. `run_pathfindR()` maps the input genes onto this PIN and identifies active subnetworks which are then be used for enrichment analyses. To change the default PIN ("Biogrid"), use the `pin_name_path` argument:
 
 ```{r change_PIN1}
-output_df <- run_pathfindR(input_df, pin_name_path = "IntAct")
+output_df <- run_pathfindR(example_pathfindR_input, pin_name_path = "IntAct")
 ```
 
 The `pin_name_path` argument can be one of "Biogrid", "STRING", "GeneMania", "IntAct", "KEGG", "mmu_STRING" or it can be the path to a custom PIN file provided by the user.
 
 ```{r change_PIN2}
 # to use an external PIN of your choice
-output_df <- run_pathfindR(input_df, pin_name_path = "/path/to/myPIN.sif")
+output_df <- run_pathfindR(example_pathfindR_input, pin_name_path = "/path/to/myPIN.sif")
 ```
 
 > NOTE: the PIN is also used for generating the background genes (in this case, all unique genes in the PIN) during hypergeometric-distribution-based tests in enrichment analyses. Therefore, a large PIN will generally result in better results.
@@ -144,9 +149,9 @@ Currently, there are three algorithms implemented in pathfindR for active subnet
 
 ```{r change_method}
 # for simulated annealing:
-output_df <- run_pathfindR(input_df, search_method = "SA")
+output_df <- run_pathfindR(example_pathfindR_input, search_method = "SA")
 # for genetic algorithm:
-output_df <- run_pathfindR(input_df, search_method = "GA")
+output_df <- run_pathfindR(example_pathfindR_input, search_method = "GA")
 ```
 
 ### Other Arguments 
@@ -154,14 +159,14 @@ output_df <- run_pathfindR(input_df, search_method = "GA")
 Because the active subnetwork search algorithms are stochastic, `run_pathfindR()` may be set to iterate the active subnetwork identification and enrichment steps multiple times (by default 1 time). To change this number, set `iterations`:
 
 ```{r change_n_iters}
-output_df <- run_pathfindR(input_df, iterations = 25) 
+output_df <- run_pathfindR(example_pathfindR_input, iterations = 25)
 ```
 
 `run_pathfindR()` uses a parallel loop (using the package `foreach`) for performing these iterations in parallel. By default, the number of processes to be used is determined automatically. To override, change `n_processes`:
 
 ``` {r change_n_proc}
-# if not set, n_processes defaults to (number of detected cores - 1)
-output_df <- run_pathfindR(input_df, iterations = 5, n_processes = 2)
+# if not set, `n_processes` defaults to (number of detected cores - 1)
+output_df <- run_pathfindR(example_pathfindR_input, iterations = 5, n_processes = 2)
 ```
 
 ## Output
@@ -179,10 +184,10 @@ output_df <- run_pathfindR(input_df, iterations = 5, n_processes = 2)
 - Up_regulated: the up-regulated genes (as determined by `change value` > 0, if the `change column` was provided) in the input involved in the given term's gene set, comma-separated. If change column was not provided, all affected input genes are listed here.
 - Down_regulated: the down-regulated genes (as determined by `change value` < 0, if the `change column` was provided) in the input involved in the given term's gene set, comma-separated
 
-The first 2 rows of the output data frame of the example analysis on the rheumatoid arthritis gene-level differential expression input data (`RA_input`) is shown below:
+The first 2 rows of the output data frame of the example analysis on the rheumatoid arthritis gene-level differential expression input data (`example_pathfindR_input`) is shown below:
 
 ```{r example_out, eval=TRUE}
-knitr::kable(head(RA_output, 2))
+knitr::kable(head(example_pathfindR_output, 2))
 ```
 
 By default, `run_pathfindR()` also produces a graphical summary of enrichment results for top 10 enriched terms, which can also be later produced by `enrichment_chart()`:
@@ -193,17 +198,19 @@ You may also disable plotting this chart by setting `plot_enrichment_chart=FALSE
 
 ```{r encrichment_plot_shown}
 # change number of top terms plotted (default = 10)
-enrichment_chart(result_df = RA_output, 
-                 top_terms = 15)
+enrichment_chart(
+  result_df = example_pathfindR_output,
+  top_terms = 15
+)
 ```
 
-### HTML Report
+### HTML Report (created when `output_dir` is set)
 
-The function also creates an HTML report `results.html` that is saved in the output directory. This report contains links to two other HTML files:
+The function also creates an HTML report `results.html` that is saved in the output directory if it's set. This report contains links to two other HTML files:
 
 **1. `enriched_terms.html`**
 
-This document contains the table of the active subnetwork-oriented enrichment results (same as the returned data frame). By default, each enriched term description is linked to the visualization of the term, with the gene nodes colored according to their change values. If you choose not to create the visualization files, set `visualize_enriched_terms = FALSE`.
+This document contains the table of the active subnetwork-oriented enrichment results (same as the returned data frame).
 
 **2. `conversion_table.html`**
 
@@ -218,7 +225,34 @@ This document contains the table of converted gene symbols. Columns are:
 
 The document contains a second table of genes for which **no interactions** were identified after checking for alias symbols (so these could not be used during the analysis).
 
+## Enriched Term Diagrams
 
+For H.sapiens KEGG enrichment analyses, `visualize_terms()` can be used to generate KEGG pathway diagrams that are saved as PNG files in a directory called "term_visualizations" under the current working directory:
+
+```{r KEGG_vis, eval=FALSE}
+input_processed <- input_processing(example_pathfindR_input)
+visualize_terms(
+  result_df = example_pathfindR_output,
+  input_processed = input_processed,
+  hsa_KEGG = TRUE
+)
+```
+
+<img src="./hsaKEGG_diagram.png" style="max-width:100%;" />
+
+Alternatively (i.e., for other types of non-KEGG/non-H.sapiens enrichment analyses), an interaction diagram per enriched term can be generated again via `visualize_terms()`. These diagrams are also saved as PNG files in a directory called "term_visualizations" under the current working directory:
+
+```{r nonKEGG_viss, eval=FALSE}
+input_processed <- input_processing(example_pathfindR_input)
+visualize_terms(
+  result_df = example_pathfindR_output,
+  input_processed = input_processed,
+  hsa_KEGG = FALSE,
+  pin_name_path = "Biogrid"
+)
+```
+
+<img src="./example_interaction_vis.png" style="max-width:100%;" />
 
 # Clustering Enriched Terms
 
@@ -231,22 +265,22 @@ The wrapper function `cluster_enriched_terms()` can be used to perform clusterin
 By default, `cluster_enriched_terms()` performs hierarchical clustering of the terms (using $1 - \kappa$ as the distance metric). Iterating over $2,3,...n$ clusters (where $n$ is the number of terms), `cluster_enriched_terms()` determines the optimal number of clusters by maximizing the average silhouette width, partitions the data into this optimal number of clusters and returns a data frame with cluster assignments.
 
 ```{r hierarchical0}
-RA_clustered <- cluster_enriched_terms(RA_output, plot_dend = FALSE, plot_clusters_graph = FALSE)
+example_pathfindR_output_clustered <- cluster_enriched_terms(example_pathfindR_output, plot_dend = FALSE, plot_clusters_graph = FALSE)
 ```
 
 ```{r hierarchical1, eval=TRUE}
 ## First 2 rows of clustered data frame
-knitr::kable(head(RA_clustered, 2))
+knitr::kable(head(example_pathfindR_output_clustered, 2))
 ## The representative terms
-knitr::kable(RA_clustered[RA_clustered$Status == "Representative", ])
+knitr::kable(example_pathfindR_output_clustered[example_pathfindR_output_clustered$Status == "Representative", ])
 ```
 
 After clustering, you may again plot the summary enrichment chart and display the enriched terms by clusters:
 
 ```{r hierarchical2, eval=TRUE}
 # plotting only selected clusters for better visualization
-RA_selected <- subset(RA_clustered, Cluster %in% 5:7)
-enrichment_chart(RA_selected, plot_by_cluster = TRUE)
+selected_clusters <- subset(example_pathfindR_output_clustered, Cluster %in% 5:7)
+enrichment_chart(selected_clusters, plot_by_cluster = TRUE)
 ```
 
 For details, see `?hierarchical_term_clustering`
@@ -256,7 +290,7 @@ For details, see `?hierarchical_term_clustering`
 Alternatively, the `fuzzy` clustering method (as described by Huang et al.[^1]) can be used:
 
 ```{r fuzzy}
-RA_clustered_fuzzy <- cluster_enriched_terms(RA_output, method = "fuzzy")
+clustered_fuzzy <- cluster_enriched_terms(example_pathfindR_output, method = "fuzzy")
 ```
 
 For details, see `?fuzzy_term_clustering`
@@ -266,7 +300,7 @@ For details, see `?fuzzy_term_clustering`
 The function `term_gene_heatmap()` can be used to visualize the heatmap of genes that are involved in the enriched terms. This heatmap allows visual identification of the input genes involved in the enriched terms, as well as the common or distinct genes between different terms. If the input data frame (same as in `run_pathfindR()`) is supplied, the tile colors indicate the change values.
 
 ```{r hmap1}
-term_gene_heatmap(result_df = RA_output, genes_df = RA_input)
+term_gene_heatmap(result_df = example_pathfindR_output, genes_df = example_pathfindR_input)
 ```
 
 <img src="./hmap.png" style="max-width:100%;" />
@@ -278,7 +312,7 @@ See the vignette [Visualization of pathfindR Enrichment Results](visualization_v
 The visualization function `term_gene_graph()` (adapted from the "Gene-Concept network visualization" by the R package `enrichplot`) can be utilized to visualize which genes are involved in the enriched terms. The function creates a term-gene graph which shows the connections between genes and biological terms (enriched pathways or gene sets). This allows for the investigation of multiple terms to which significant genes are related. This graph also enables visual determination of the degree of overlap between the enriched terms by identifying shared and/or distinct significant genes.
 
 ```{r term_gene_graph}
-term_gene_graph(result_df = RA_output, use_description = TRUE)
+term_gene_graph(result_df = example_pathfindR_output, use_description = TRUE)
 ```
 
 <img src="./term_gene.png" style="max-width:100%;" />
@@ -290,7 +324,7 @@ See the vignette [Visualization of pathfindR Enrichment Results](visualization_v
 UpSet plots are plots of the intersections of sets as a matrix. This function creates a ggplot object of an UpSet plot where the x-axis is the UpSet plot of intersections of enriched terms. By default (i.e., `method = "heatmap"`), the main plot is a heatmap of genes at the corresponding intersections, colored by up/down regulation (if `genes_df` is provided, colored by change values). If `method = "barplot"`, the main plot is bar plots of the number of genes at the corresponding intersections. Finally, if `method = "boxplot"` and `genes_df` is provided, then the main plot displays the boxplots of change values of the genes at the corresponding intersections.
 
 ```{r upset}
-UpSet_plot(result_df = RA_output, genes_df = RA_input)
+UpSet_plot(result_df = example_pathfindR_output, genes_df = example_pathfindR_input)
 ```
 
 <img src="./upset.png" style="max-width:100%;" />
@@ -303,34 +337,41 @@ The function `score_terms()` can be used to calculate the agglomerated z score o
 
 ```{r scores, eval=TRUE, fig.height=4, fig.width=8}
 ## Vector of "Case" IDs
-cases <- c("GSM389703", "GSM389704", "GSM389706", "GSM389708", 
-           "GSM389711", "GSM389714", "GSM389716", "GSM389717", 
-           "GSM389719", "GSM389721", "GSM389722", "GSM389724", 
-           "GSM389726", "GSM389727", "GSM389730", "GSM389731", 
-           "GSM389733", "GSM389735")
+cases <- c(
+  "GSM389703", "GSM389704", "GSM389706", "GSM389708",
+  "GSM389711", "GSM389714", "GSM389716", "GSM389717",
+  "GSM389719", "GSM389721", "GSM389722", "GSM389724",
+  "GSM389726", "GSM389727", "GSM389730", "GSM389731",
+  "GSM389733", "GSM389735"
+)
 
-## Calculate scores for representative terms 
+## Calculate scores for representative terms
 ## and plot heat map using term descriptions
-score_matrix <- score_terms(enrichment_table = RA_clustered[RA_clustered$Status == "Representative", ],
-                            exp_mat = RA_exp_mat,
-                            cases = cases,
-                            use_description = TRUE, # default FALSE
-                            label_samples = FALSE, # default = TRUE
-                            case_title = "RA",  # default = "Case"
-                            control_title = "Healthy", # default = "Control"
-                            low = "#f7797d", # default = "green"
-                            mid = "#fffde4", # default = "black"
-                            high = "#1f4037") # default = "red"
+representative_df <- example_pathfindR_output_clustered[example_pathfindR_output_clustered$Status == "Representative", ]
+score_matrix <- score_terms(
+  enrichment_table = representative_df,
+  exp_mat = example_experiment_matrix,
+  cases = cases,
+  use_description = TRUE, # default FALSE
+  label_samples = FALSE, # default = TRUE
+  case_title = "RA", # default = "Case"
+  control_title = "Healthy", # default = "Control"
+  low = "#f7797d", # default = "green"
+  mid = "#fffde4", # default = "black"
+  high = "#1f4037" # default = "red"
+)
 ```
 
 # Comparison of 2 pathfindR Results
 
-The function `combine_pathfindR_results()` allows combination of two pathfindR active-subnetwork-oriented enrichment analysis results for investigating common and distinct terms between the groups. Below is an example for comparing results using two different rheumatoid arthritis-related data sets(`RA_output` and `RA_comparison_output`).
+The function `combine_pathfindR_results()` allows combination of two pathfindR active-subnetwork-oriented enrichment analysis results for investigating common and distinct terms between the groups. Below is an example for comparing results using two different rheumatoid arthritis-related data sets(`example_pathfindR_output` and `example_comparison_output`).
 
 ```{r compare2res, eval=TRUE, fig.height=4, fig.width=8}
-combined_df <- combine_pathfindR_results(result_A = RA_output, 
-                                         result_B = RA_comparison_output, 
-                                         plot_common = FALSE)
+combined_df <- combine_pathfindR_results(
+  result_A = example_pathfindR_output,
+  result_B = example_comparison_output,
+  plot_common = FALSE
+)
 ```
 
 For more details, see the vignette [Comparing Two pathfindR Results](comparing_results.html)
@@ -364,34 +405,41 @@ set.seed(123)
 
 ## Select 40 random genes from MYC gene sets and 10 from CREB gene sets
 selected_genes <- sample(MYC_target_genes, 40)
-selected_genes <- c(selected_genes, 
-                    sample(CREB_target_genes, 10))
+selected_genes <- c(
+  selected_genes,
+  sample(CREB_target_genes, 10)
+)
 
 ## Assign random p value between 0.001 and 0.05 for each selected gene
 rand_p_vals <- sample(seq(0.001, 0.05, length.out = 5),
-                      size = length(selected_genes),
-                      replace = TRUE)
+  size = length(selected_genes),
+  replace = TRUE
+)
 
-input_df <- data.frame(Gene_symbol = selected_genes,
-                       p_val = rand_p_vals)
-knitr::kable(head(input_df))
+example_pathfindR_input <- data.frame(
+  Gene_symbol = selected_genes,
+  p_val = rand_p_vals
+)
+knitr::kable(head(example_pathfindR_input))
 ```
 
 Finally, we perform active-subnetwork-oriented enrichment analysis via `run_pathfindR()` using the custom genes as the gene sets:
 
 ```{r custom_run}
-custom_result <- run_pathfindR(input_df,
-                               gene_sets = "Custom",
-                               custom_genes = custom_genes,
-                               custom_descriptions = custom_descriptions,
-                               max_gset_size = Inf, # DO NOT LIMIT GENE SET SIZE
-                               output_dir = "misc/v1.4/CREB_MYC")
+example_custom_genesets_result <- run_pathfindR(
+  example_pathfindR_input,
+  gene_sets = "Custom",
+  custom_genes = custom_genes,
+  custom_descriptions = custom_descriptions,
+  max_gset_size = Inf, # DO NOT LIMIT GENE SET SIZE
+  output_dir = "misc/CREB_MYC"
+)
 
-knitr::kable(custom_result)
+knitr::kable(example_custom_genesets_result)
 ```
 
 ```{r custom_result1, eval=TRUE, echo=FALSE}
-knitr::kable(custom_result)
+knitr::kable(example_custom_genesets_result)
 ```
 
 > It is also possible to run pathfindR using non-human organism annotation. See the vignette [pathfindR Analysis for non-Homo-sapiens organisms](non_hs_analysis.html)

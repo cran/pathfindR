@@ -1,13 +1,17 @@
 ## ---- include = FALSE---------------------------------------------------------
-knitr::opts_chunk$set(collapse = TRUE,
-                      comment = "#>",
-                      fig.width = 7, fig.height = 7, fig.align = "center",
-                      eval = FALSE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7, fig.height = 7, fig.align = "center",
+  eval = FALSE
+)
 suppressPackageStartupMessages(library(pathfindR))
 
 ## ----mmu_kegg-----------------------------------------------------------------
-#  gsets_list <- get_gene_sets_list(source = "KEGG",
-#                                   org_code = "mmu")
+#  gsets_list <- get_gene_sets_list(
+#    source = "KEGG",
+#    org_code = "mmu"
+#  )
 
 ## ----KEGG_save----------------------------------------------------------------
 #  mmu_kegg_genes <- gsets_list$gene_sets
@@ -34,8 +38,10 @@ suppressPackageStartupMessages(library(pathfindR))
 #  mmu_string_df <- mmu_string_df[mmu_string_df$combined_score >= 800, ]
 #  
 #  ## fix ids
-#  mmu_string_pin <- data.frame(Interactor_A = sub("^10090\\.", "", mmu_string_df$protein1),
-#                               Interactor_B = sub("^10090\\.", "", mmu_string_df$protein2))
+#  mmu_string_pin <- data.frame(
+#    Interactor_A = sub("^10090\\.", "", mmu_string_df$protein1),
+#    Interactor_B = sub("^10090\\.", "", mmu_string_df$protein2)
+#  )
 #  head(mmu_string_pin, 2)
 
 ## ----process_PIN2, eval=FALSE-------------------------------------------------
@@ -43,10 +49,12 @@ suppressPackageStartupMessages(library(pathfindR))
 #  
 #  mmu_ensembl <- useMart("ensembl", dataset = "mmusculus_gene_ensembl")
 #  
-#  converted <- getBM(attributes = c("ensembl_peptide_id", "mgi_symbol"),
-#                     filters = "ensembl_peptide_id",
-#                     values = unique(unlist(mmu_string_pin)),
-#                     mart = mmu_ensembl)
+#  converted <- getBM(
+#    attributes = c("ensembl_peptide_id", "mgi_symbol"),
+#    filters = "ensembl_peptide_id",
+#    values = unique(unlist(mmu_string_pin)),
+#    mart = mmu_ensembl
+#  )
 #  mmu_string_pin$Interactor_A <- converted$mgi_symbol[match(mmu_string_pin$Interactor_A, converted$ensembl_peptide_id)]
 #  mmu_string_pin$Interactor_B <- converted$mgi_symbol[match(mmu_string_pin$Interactor_B, converted$ensembl_peptide_id)]
 #  mmu_string_pin <- mmu_string_pin[!is.na(mmu_string_pin$Interactor_A) & !is.na(mmu_string_pin$Interactor_B), ]
@@ -62,40 +70,47 @@ suppressPackageStartupMessages(library(pathfindR))
 #  # remove duplicated inteactions (including symmetric ones)
 #  mmu_string_pin <- unique(t(apply(mmu_string_pin, 1, sort))) # this will return a matrix object
 #  
-#  mmu_string_pin <- data.frame(A = mmu_string_pin[, 1],
-#                               pp = "pp",
-#                               B = mmu_string_pin[, 2])
+#  mmu_string_pin <- data.frame(
+#    A = mmu_string_pin[, 1],
+#    pp = "pp",
+#    B = mmu_string_pin[, 2]
+#  )
 
 ## ----process_PIN4-------------------------------------------------------------
 #  path2SIF <- file.path(tempdir(), "mmusculusPIN.sif")
 #  write.table(mmu_string_pin,
-#              file = path2SIF,
-#              col.names = FALSE,
-#              row.names = FALSE,
-#              sep = "\t",
-#              quote = FALSE)
+#    file = path2SIF,
+#    col.names = FALSE,
+#    row.names = FALSE,
+#    sep = "\t",
+#    quote = FALSE
+#  )
 #  path2SIF <- normalizePath(path2SIF)
 
 ## ----mmu_input_df, eval=TRUE--------------------------------------------------
-knitr::kable(head(myeloma_input))
+knitr::kable(head(example_mmu_input))
 
 ## ----run----------------------------------------------------------------------
-#  myeloma_output <- run_pathfindR(input = myeloma_input,
-#                                  convert2alias = FALSE,
-#                                  gene_sets = "Custom",
-#                                  custom_genes = mmu_kegg_genes,
-#                                  custom_descriptions = mmu_kegg_descriptions,
-#                                  pin_name_path = path2SIF)
+#  example_mmu_output <- run_pathfindR(
+#    input = example_mmu_input,
+#    convert2alias = FALSE,
+#    gene_sets = "Custom",
+#    custom_genes = mmu_kegg_genes,
+#    custom_descriptions = mmu_kegg_descriptions,
+#    pin_name_path = path2SIF
+#  )
 
 ## ----enr_chart, echo=FALSE, eval=TRUE-----------------------------------------
-enrichment_chart(myeloma_output)
+enrichment_chart(example_mmu_output)
 
 ## ----output, eval=TRUE--------------------------------------------------------
-knitr::kable(myeloma_output)
+knitr::kable(example_mmu_output)
 
 ## ----run2---------------------------------------------------------------------
-#  myeloma_output <- run_pathfindR(input = myeloma_input,
-#                                  convert2alias = FALSE,
-#                                  gene_sets = "mmu_KEGG",
-#                                  pin_name_path = "mmu_STRING")
+#  example_mmu_output <- run_pathfindR(
+#    input = example_mmu_input,
+#    convert2alias = FALSE,
+#    gene_sets = "mmu_KEGG",
+#    pin_name_path = "mmu_STRING"
+#  )
 
