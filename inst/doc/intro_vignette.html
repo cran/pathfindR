@@ -12,7 +12,7 @@
 
 <meta name="author" content="Ege Ulgen" />
 
-<meta name="date" content="2023-05-09" />
+<meta name="date" content="2023-05-11" />
 
 <title>Introduction to pathfindR</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Introduction to pathfindR</h1>
 <h4 class="author">Ege Ulgen</h4>
-<h4 class="date">2023-05-09</h4>
+<h4 class="date">2023-05-11</h4>
 
 
 
@@ -493,9 +493,8 @@ p-values &lt; 0.05. To change this threshold, use
 <div id="output-directory" class="section level3">
 <h3>Output Directory</h3>
 <p>By default, <code>run_pathfindR()</code> creates a temporary
-directory for writing the output files, including active subnetwork
-search results and a HTML report. To set the output directory, use
-<code>output_dir</code>:</p>
+directory for writing the output files, i.e. active subnetwork search
+results. To set the output directory, use <code>output_dir</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>output_df <span class="ot">&lt;-</span> <span class="fu">run_pathfindR</span>(example_pathfindR_input, <span class="at">output_dir =</span> <span class="st">&quot;this_is_my_output_directory&quot;</span>)</span></code></pre></div>
 <p>This creates <code>&quot;this_is_my_output_directory&quot;</code> under the
 current working directory.</p>
@@ -705,35 +704,6 @@ the function <code>enrichment_chart()</code>:</p>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">result_df =</span> example_pathfindR_output,</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_terms =</span> <span class="dv">15</span></span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-<div id="html-report-created-when-output_dir-is-set" class="section level3">
-<h3>HTML Report (created when <code>output_dir</code> is set)</h3>
-<p>The function also creates an HTML report <code>results.html</code>
-that is saved in the output directory if it’s set. This report contains
-links to two other HTML files:</p>
-<p><strong>1. <code>enriched_terms.html</code></strong></p>
-<p>This document contains the table of the active subnetwork-oriented
-enrichment results (same as the returned data frame).</p>
-<p><strong>2. <code>conversion_table.html</code></strong></p>
-<p>This document contains the table of converted gene symbols. Columns
-are:</p>
-<ul>
-<li>Old Symbol: the original gene symbol</li>
-<li>Converted Symbol: the alias symbol that was found in the PIN</li>
-<li>Change: the provided change value</li>
-<li>p-value: the provided adjusted p value</li>
-</ul>
-<blockquote>
-<p>During input processing, gene symbols that are not in the PIN are
-identified and excluded. For human genes, if aliases of these missing
-gene symbols are found in the PIN, these symbols are converted to the
-corresponding aliases (controlled by the argument
-<code>convert2alias</code>). This step is performed to best map the
-input data onto the PIN.</p>
-</blockquote>
-<p>The document contains a second table of genes for which <strong>no
-interactions</strong> were identified after checking for alias symbols
-(so these could not be used during the analysis).</p>
 </div>
 </div>
 <div id="enriched-term-diagrams" class="section level2">
