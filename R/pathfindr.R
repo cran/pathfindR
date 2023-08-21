@@ -32,6 +32,7 @@
 #' See \code{\link{get_pin_file}} for obtaining organism-specific PIN data and
 #' \code{\link{get_gene_sets_list}} for obtaining organism-specific gene sets data
 #' @import pathfindR.data
-#' @docType package
 #' @name pathfindR
-NULL
+"_PACKAGE"
+
+globalVariables(c("for_coloring", "size"))
