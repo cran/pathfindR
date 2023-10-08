@@ -1,3 +1,7 @@
+# pathfindR 2.3.0
+## Major Changes
+- reverted removal of `create_HTML_report()` so `run_pathfindR()` once again generates HTML reports
+
 # pathfindR 2.2.0
 ## Minor Changes and Bug Fixes
 - added the `disable_parallel` argument in `active_snw_enrichment_wrapper()` to be able to disable parallel runs via `foreach` 
