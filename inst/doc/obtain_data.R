@@ -1,4 +1,4 @@
-## ----include = FALSE----------------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -45,7 +45,7 @@ knitr::opts_chunk$set(
 #    collection = "C5"
 #  )
 
-## ----eval=TRUE----------------------------------------------------------------
+## ---- eval=TRUE---------------------------------------------------------------
 ## see msigdbr::msigdbr_show_species() for all available organisms
 msigdbr::msigdbr_show_species()
 

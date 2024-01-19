@@ -1,4 +1,4 @@
-## Tests for agglomerated term scoring functions - Aug 2023
+## Tests for agglomerated term scoring functions - Jan 2024
 
 test_that("`score_terms()` -- returns score matrix", {
     mockery::stub(score_terms, "graphics::plot", NULL)
@@ -10,6 +10,38 @@ test_that("`score_terms()` -- returns score matrix", {
         plot_hmap = TRUE), "matrix")
     expect_is(score_terms(enrichment_table = small_result, exp_mat = example_experiment_matrix,
         cases = colnames(example_experiment_matrix)[1:3], plot_hmap = TRUE), "matrix")
+})
+
+test_that("`score_terms()` -- matches gene symbols correctly", {
+  toy_result <- data.frame(
+    ID = c("gset1", "gset2"),
+    Term_Description = c("gset1", "gset2"),
+    Up_regulated = "",
+    Down_regulated = c(
+      paste(paste0("Gene_", c(1, 3, 5)), collapse = ", "),
+      paste(paste0("Gene_", c(6, 8)), collapse = ", ")
+    )
+  )
+  toy_result2 <- data.frame(
+    ID = c("gset1", "gset2"),
+    Term_Description = c("gset1", "gset2"),
+    Up_regulated = "",
+    Down_regulated = c(
+      paste(paste0("Dummy_", c(1, 3, 5)), collapse = ", "),
+      paste(paste0("Gene_", c(6, 8)), collapse = ", ")
+    )
+  )
+  toy_exp_mat <- matrix(
+    rnorm(40), nrow = 10, ncol = 4, dimnames = list(paste0("gene_", 1:10), paste0("subject_", 1:4))
+  )
+  expect_is(res_mat <- score_terms(enrichment_table = toy_result, exp_mat = toy_exp_mat,
+                        plot_hmap = FALSE), "matrix")
+  expect_equal(nrow(res_mat), 2)
+
+
+  expect_is(res_mat <- score_terms(enrichment_table = toy_result2, exp_mat = toy_exp_mat,
+                                   plot_hmap = FALSE), "matrix")
+  expect_equal(nrow(res_mat), 1)
 })
 
 test_that("`score_terms()` -- argument checks work", {
@@ -83,7 +115,10 @@ test_that("`plot_scores()` -- creates term score heatmap ggplot object with corr
     })
 
 test_that("`plot_scores()` -- argument checks work", {
+    expect_error(plot_scores(score_matrix = c()), "`score_matrix` should be a matrix")
+    expect_error(plot_scores(score_matrix = data.frame()), "`score_matrix` should be a matrix")
     expect_error(plot_scores(score_matrix = list()), "`score_matrix` should be a matrix")
+
     mat <- matrix(1, nrow = 3, ncol = 2, dimnames = list(paste0("T", 1:3), c("A",
         "B")))
 
@@ -97,4 +132,8 @@ test_that("`plot_scores()` -- argument checks work", {
 
     expect_error(plot_scores(score_matrix = mat, control_title = 1), "`control_title` should be a single character value")
     expect_error(plot_scores(score_matrix = mat, control_title = rep("z", 3)), "`control_title` should be a single character value")
+
+    expect_error(plot_scores(score_matrix = mat, low = ""))
+    expect_error(plot_scores(score_matrix = mat, mid = ""))
+    expect_error(plot_scores(score_matrix = mat, high = ""))
 })

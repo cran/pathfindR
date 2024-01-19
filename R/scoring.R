@@ -114,16 +114,21 @@ score_terms <- function(enrichment_table, exp_mat, cases = NULL, use_description
 
         genes <- c(up_genes, down_genes)
 
+        # convert gene symbols to upper case for comparison
+        genes <- toupper(genes)
+        exp_mat_genes <- rownames(exp_mat)
+        exp_mat_genes <- toupper(exp_mat_genes)
+
         # some genes may not be in exp. matrix
-        genes <- genes[genes %in% rownames(exp_mat)]
+        genes <- genes[genes %in% exp_mat_genes]
 
         if (length(genes) != 0) {
             # subset exp. matrix to include only genes
-            sub_mat <- exp_mat[rownames(exp_mat) %in% genes, , drop = FALSE]
+            sub_mat <- exp_mat[exp_mat_genes %in% genes, , drop = FALSE]
 
             current_term_score_matrix <- c()
             for (gene in genes) {
-                gene_vec <- sub_mat[rownames(sub_mat) == gene, ]
+                gene_vec <- sub_mat[toupper(rownames(sub_mat)) == gene, ]
                 gene_vec <- as.numeric(gene_vec)
                 names(gene_vec) <- colnames(sub_mat)
 
@@ -216,6 +221,17 @@ plot_scores <- function(score_matrix, cases = NULL, label_samples = TRUE, case_t
         stop("`control_title` should be a single character value")
     }
 
+    if (!isColor(low)) {
+      stop("`low` should be a valid color")
+    }
+
+    if (!isColor(mid)) {
+      stop("`mid` should be a valid color")
+    }
+
+    if (!isColor(high)) {
+      stop("`high` should be a valid color")
+    }
 
     #### Create plot sort according to activity (up/down)
     if (!is.null(cases)) {
