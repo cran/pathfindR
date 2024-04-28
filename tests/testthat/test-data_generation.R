@@ -28,11 +28,29 @@ test_that("`get_biogrid_pin()` -- returns a path to a valid PIN file", {
     expected_biogrid_pin_df <- data.frame(V1 = expected_biogrid_pin_df$Interactor_A,
         V2 = "pp", V3 = expected_biogrid_pin_df$Interactor_B)
 
-    pin_path <- get_biogrid_pin()
+    pin_path <- get_biogrid_pin(release = "4.4.211")
     pin_df <- read.delim(pin_path, header = FALSE)
     expect_true(ncol(pin_df) == 3)
     expect_true(all(pin_df[, 2] == "pp"))
     expect_identical(pin_df, expected_biogrid_pin_df)
+})
+
+test_that("`get_biogrid_pin()` -- determines and downloads the latest version", {
+  mockery::stub(get_biogrid_pin, "utils::download.file", NULL)
+  mockery::stub(get_biogrid_pin, "utils::unzip", list(Name = "BIOGRID-ORGANISM-Homo_sapiens-X.X.X.tab3.txt"))
+  mockery::stub(get_biogrid_pin, "utils::read.delim", toy_biogrid_pin)
+
+  expected_biogrid_pin_df <- toy_biogrid_pin
+  colnames(expected_biogrid_pin_df) <- c("Interactor_A", "Interactor_B")
+  expected_biogrid_pin_df <- process_pin(expected_biogrid_pin_df)
+  expected_biogrid_pin_df <- data.frame(V1 = expected_biogrid_pin_df$Interactor_A,
+                                        V2 = "pp", V3 = expected_biogrid_pin_df$Interactor_B)
+
+  pin_path <- get_biogrid_pin()
+  pin_df <- read.delim(pin_path, header = FALSE)
+  expect_true(ncol(pin_df) == 3)
+  expect_true(all(pin_df[, 2] == "pp"))
+  expect_identical(pin_df, expected_biogrid_pin_df)
 })
 
 test_that("`get_biogrid_pin()` -- error check works", {
@@ -73,31 +91,75 @@ test_that("`gset_list_from_gmt()` -- works as expected", {
 
 
 test_that("`get_kegg_gsets()` -- works as expected", {
-    skip_on_cran()
-    toy_kegg_pw_list <- KEGGREST::keggList("pathway", "hsa")[10:11]
-    mockery::stub(get_kegg_gsets, "KEGGREST::keggList", toy_kegg_pw_list)
+  skip_on_cran()
+  mock_responses <- c(
+    httr::content(httr::GET(paste0("https://rest.kegg.jp/list/eco")), "text"),
+    "eco00010\tdescription\neco00071\tdescription2"
+  )
 
-    expect_is(hsa_kegg <- get_kegg_gsets(), "list")
-    expect_length(hsa_kegg, 2)
-    expect_true(all(names(hsa_kegg) == c("gene_sets", "descriptions")))
-    expect_true(all(names(hsa_kegg[["gene_sets"]]) %in% names(hsa_kegg[["descriptions"]])))
-    toy_kegg_pw_list <- sub(" & .*$", "", sub("-([^-]*)$", "&\\1", toy_kegg_pw_list))
-    expect_true(all(toy_kegg_pw_list %in% hsa_kegg$descriptions))
-    expect_true(all(names(toy_kegg_pw_list) %in% names(hsa_kegg[["gene_sets"]])))
+  call_count <- 0
 
-    toy_kegg_pw_list2 <- KEGGREST::keggList("pathway", "hsa")[1]
-    mockery::stub(get_kegg_gsets, "KEGGREST::keggList", toy_kegg_pw_list2)
-    expect_is(res <- get_kegg_gsets(), "list")
-    expect_length(res$gene_sets, 0)
-    expect_length(res$descriptions, 0)
+  # function to manage sequential responses
+  mock_content <- function(...) {
+    call_count <<- call_count + 1
+    return(mock_responses[call_count])
+  }
+
+
+  with_mock(`httr::content` = mock_content, {
+    expect_is(toy_eco_kegg <- pathfindR:::get_kegg_gsets(), "list")
+  })
+
+  expect_length(toy_eco_kegg, 2)
+  expect_true(all(names(toy_eco_kegg) == c("gene_sets", "descriptions")))
+  expect_true(all(names(toy_eco_kegg[["gene_sets"]]) %in% names(toy_eco_kegg[["descriptions"]])))
+  expect_length(toy_eco_kegg[["gene_sets"]], 2)
+  expect_length(toy_eco_kegg[["descriptions"]], 2)
+
+  expect_true(toy_eco_kegg[["descriptions"]]["eco00010"] == "description")
+  expect_true(toy_eco_kegg[["descriptions"]]["eco00071"] == "description2")
+
+  expect_length(toy_eco_kegg[["gene_sets"]][["eco00010"]], 47)
+  expect_length(toy_eco_kegg[["gene_sets"]][["eco00071"]], 15)
 })
 
 test_that("`get_reactome_gsets()` -- works as expected", {
-    skip_on_cran()
-    expect_is(reactome <- get_reactome_gsets(), "list")
-    expect_length(reactome, 2)
-    expect_true(all(names(reactome) == c("gene_sets", "descriptions")))
-    expect_true(all(names(reactome[["gene_sets"]] %in% names(reactome[["descriptions"]]))))
+  skip_on_cran()
+
+  pw1 <- "Pathway1"
+  pw2 <- "Pathway2"
+  desc1 <- "Description1"
+  desc2 <- "Description2"
+  genes1 <- c("GeneA", "GeneB")
+  genes2 <- c("GeneC", "GeneD", "GeneE")
+
+  gmt_content <- paste(
+    c(
+      paste(c(desc1, pw1, genes1), collapse = "\t"),
+      paste(c(desc2, pw2, genes2), collapse = "\t")
+    ),
+    collapse = "\n"
+  )
+
+  mockery::stub(get_reactome_gsets, "utils::download.file", NULL)
+
+  unz_mock <- function(zipfile, filename, ...) {
+    textConnection(gmt_content)
+  }
+  mockery::stub(get_reactome_gsets, "unz", unz_mock)
+
+  expected_gsets <- list(genes1, genes2)
+  names(expected_gsets) <- c(pw1, pw2)
+  expect_descriptions <- c(desc1, desc2)
+  names(expect_descriptions) <- c(pw1, pw2)
+
+  expect_is(reactome <- get_reactome_gsets(), "list")
+  expect_length(reactome, 2)
+  expect_length(reactome$gene_sets, 2)
+  expect_length(reactome$descriptions, 2)
+  expect_equal(names(reactome$gene_sets), names(reactome$descriptions))
+  expect_equal(reactome$gene_sets, expected_gsets)
+  expect_equal(reactome$descriptions, expect_descriptions)
 })
 
 test_that("`get_mgsigdb_gsets()` -- works as expected", {

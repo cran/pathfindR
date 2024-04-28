@@ -1,3 +1,17 @@
+# pathfindR 2.4.0
+
+## Major Changes
+
+- implemented a new `color_kegg_pathway()` function using `ggkegg` to create colored KEGG pathway ggplot objects (instead of using `KEGGREST` to obtain the colored PNG files, which no longer works #169)
+- renamed the `visualize_hsa_KEGG` function to `visualize_KEGG_diagram()` to reflect this is now able to handle KEGG pathway enrichment results from any organism
+- updated the `visualize_terms()`, `visualize_term_interactions()` and `visualize_KEGG_diagram()` functions so that they now return a list of ggplot objects (named by term ID)
+- updated the `get_kegg_gsets()` function to also use `ggkegg` for fetching genes per pathway data
+- removed unneeded dependencies: `magick`, `KEGGgraph` and `KEGGREST`
+
+## Minor Changes and Bug Fixes
+
+- updated the `get_biogrid_pin()` function so that it can now determine the latest version and download/process it from BioGRID (via setting `release = "latest"`, which is now the default behavior) 
+
 # pathfindR 2.3.1
 
 ## Minor Changes and Bug Fixes

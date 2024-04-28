@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -23,19 +23,35 @@ enrichment_chart(example_pathfindR_output_clustered, plot_by_cluster = TRUE)
 
 ## ----KEGG_vis, eval=FALSE-----------------------------------------------------
 #  input_processed <- input_processing(example_pathfindR_input)
-#  visualize_terms(
+#  gg_list <- visualize_terms(
 #    result_df = example_pathfindR_output,
 #    input_processed = input_processed,
-#    hsa_KEGG = TRUE
+#    is_KEGG_result = TRUE
+#  )  # this function returns a list of ggraph objects (named by Term ID)
+#  
+#  # save one of the plots as PDF image
+#  ggplot2::ggsave(
+#    "hsa04911_diagram.pdf",   # path to output, format is determined by extension
+#    gg_list$hsa04911,         # what to plot
+#    width = 5                 # adjust width
+#    height = 5                # adjust height
 #  )
 
 ## ----nonKEGG_viss, eval=FALSE-------------------------------------------------
 #  input_processed <- input_processing(example_pathfindR_input)
-#  visualize_terms(
+#  gg_list <- visualize_terms(
 #    result_df = example_pathfindR_output,
 #    input_processed = input_processed,
-#    hsa_KEGG = FALSE,
+#    is_KEGG_result = FALSE,
 #    pin_name_path = "Biogrid"
+#  )  # this function returns a list of ggraph objects (named by Term ID)
+#  
+#  # save one of the plots as PDF image
+#  ggplot2::ggsave(
+#    "diabetic_cardiomyopathy_interactions.pdf",   # path to output, format is determined by extension
+#    gg_list$hsa04911,                             # what to plot
+#    width = 10                                    # adjust width
+#    height = 6                                    # adjust height
 #  )
 
 ## ----hmap---------------------------------------------------------------------

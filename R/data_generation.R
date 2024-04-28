@@ -25,12 +25,12 @@ process_pin <- function(pin_df) {
 #' list of available organisms (default = 'Homo_sapiens')
 #' @param path2pin the path of the file to save the PIN data. By default, the
 #' PIN data is saved in a temporary file
-#' @param release the requested BioGRID release (default = '4.4.224')
+#' @param release the requested BioGRID release (default = 'latest')
 #'
 #' @return the path of the file in which the PIN data was saved. If
 #' \code{path2pin} was not supplied by the user, the PIN data is saved in a
 #' temporary file
-get_biogrid_pin <- function(org = "Homo_sapiens", path2pin, release = "4.4.224") {
+get_biogrid_pin <- function(org = "Homo_sapiens", path2pin, release = "latest") {
     # check organism name
     all_org_names <- c("Anopheles_gambiae_PEST", "Apis_mellifera", "Arabidopsis_thaliana_Columbia",
         "Bacillus_subtilis_168", "Bos_taurus", "Caenorhabditis_elegans", "Candida_albicans_SC5314",
@@ -53,6 +53,14 @@ get_biogrid_pin <- function(org = "Homo_sapiens", path2pin, release = "4.4.224")
         "Vaccinia_Virus", "Vitis_vinifera", "Xenopus_laevis", "Zea_mays")
     if (!org %in% all_org_names) {
         stop(paste(org, "is not a valid Biogrid organism.", "Available organisms are listed on: https://wiki.thebiogrid.org/doku.php/statistics"))
+    }
+
+    if (release == "latest") {
+      result <- httr::GET("https://downloads.thebiogrid.org/BioGRID/Latest-Release/")
+      result <- httr::content(result, "text")
+
+      h2_matches <- regexpr("(?<=<h2>BioGRID Release\\s)(\\d\\.\\d\\.\\d+)", result, perl = TRUE)
+      release <- regmatches(result, h2_matches)
     }
 
     # release directory for download
@@ -171,45 +179,55 @@ gset_list_from_gmt <- function(path2gmt, descriptions_idx = 2) {
 #' \item{descriptions - A named vector containing the descriptions for each KEGG pathway}
 #' }
 get_kegg_gsets <- function(org_code = "hsa") {
-    # created named list, eg: path:map00010: 'Glycolysis / Gluconeogenesis'
-    pathways_list <- KEGGREST::keggList("pathway", org_code)
 
-    # make them into KEGG-style pathway identifiers
-    pathway_codes <- sub("path:", "", names(pathways_list))
+  message("Grab a cup of coffee, this will take a while...")
 
-    # parse pathway genes
-    genes_by_pathway <- lapply(pathway_codes, function(pwid) {
-        pw <- KEGGREST::keggGet(pwid)
+  gene_table_url <- paste0("https://rest.kegg.jp/list/", org_code)
+  gene_table_result <- httr::GET(gene_table_url)
+  gene_table_result <- httr::content(gene_table_result, "text")
 
-        ## get gene symbols
-        all_entries <- pw[[1]]$GENE
-        if (is.null(all_entries)) {
-            return(NULL)
-        }
-        tmp <- c(TRUE, FALSE)
-        if (grepl(";", all_entries[2])) {
-            tmp <- c(FALSE, TRUE)
-        }
-        pw <- all_entries[tmp]
+  parsed_gene_table_result <- strsplit(gene_table_result, "\n")[[1]]
+  kegg_gene_table <- data.frame(
+    kegg_id = unname(vapply(parsed_gene_table_result, function(x) unlist(strsplit(x, "\t"))[1], "org:123")),
+    symbol = unname(vapply(parsed_gene_table_result, function(x) unlist(strsplit(unlist(strsplit(x, "\t"))[4], ";"))[1], "symbol"))
+  )
+  # remove mistaken lines
+  kegg_gene_table <- kegg_gene_table[grep("^((,\\s)?[A-Za-z0-9_-]+(\\@)?)+$", kegg_gene_table$symbol), ]
 
-        pw <- sub(";.+", "", pw)  ## discard any description
-        pw <- pw[grep("^[A-Za-z0-9_-]+(\\@)?$", pw)]  ## remove mistaken lines
-        pw <- unique(pw)  ## keep unique genes
-        return(pw)
-    })
 
-    names(genes_by_pathway) <- pathway_codes
+  all_pathways_url <- paste0("https://rest.kegg.jp/list/pathway/", org_code)
+  all_pathways_result <- httr::GET(all_pathways_url)
+  all_pathways_result <- httr::content(all_pathways_result, "text")
+  parsed_all_pathways_result <- strsplit(all_pathways_result, "\n")[[1]]
+  pathway_ids <- vapply(parsed_all_pathways_result, function(x) unlist(strsplit(x, "\t"))[1], "id")
+  pathway_descriptons <- vapply(parsed_all_pathways_result, function(x) unlist(strsplit(x, "\t"))[2], "description")
+  names(pathway_descriptons) <- pathway_ids
 
-    # remove empty gene sets (metabolic pathways)
-    kegg_genes <- genes_by_pathway[vapply(genes_by_pathway, length, 1) != 0]
+  genes_by_pathway <- lapply(pathway_ids, function(pw_id) {
+    pathways_graph <- ggkegg::pathway(pid = pw_id, directory = tempdir(), use_cache = FALSE, return_tbl_graph = FALSE)
+    all_pw_gene_ids <- igraph::V(pathways_graph)$name[igraph::V(pathways_graph)$type == "gene"]
+    all_pw_gene_ids <- unlist(strsplit(all_pw_gene_ids, " "))
+    all_pw_gene_ids <- unique(all_pw_gene_ids)
 
-    kegg_descriptions <- pathways_list
-    names(kegg_descriptions) <- sub("path:", "", names(kegg_descriptions))
-    kegg_descriptions <- sub(" & .*$", "", sub("-([^-]*)$", "&\\1", kegg_descriptions))
-    kegg_descriptions <- kegg_descriptions[names(kegg_descriptions) %in% names(kegg_genes)]
+    all_pw_gene_symbols <- kegg_gene_table$symbol[match(all_pw_gene_ids, kegg_gene_table$kegg_id)]
+    all_pw_gene_symbols <- all_pw_gene_symbols[!is.na(all_pw_gene_symbols)]
+    all_pw_gene_symbols <- unname(vapply(all_pw_gene_symbols, function(x) unlist(strsplit(x, ", "))[1], "symbol"))
+    all_pw_gene_symbols <- unique(all_pw_gene_symbols)
 
-    result <- list(gene_sets = kegg_genes, descriptions = kegg_descriptions)
-    return(result)
+    return(all_pw_gene_symbols)
+  })
+
+  names(genes_by_pathway) <- pathway_ids
+
+  # remove empty gene sets (e.g. pure metabolic pathways)
+  kegg_genes <- genes_by_pathway[vapply(genes_by_pathway, length, 1) != 0]
+
+  kegg_descriptions <- pathway_descriptons
+  kegg_descriptions <- sub(" & .*$", "", sub("-([^-]*)$", "&\\1", kegg_descriptions))
+  kegg_descriptions <- kegg_descriptions[names(kegg_descriptions) %in% names(kegg_genes)]
+
+  result <- list(gene_sets = kegg_genes, descriptions = kegg_descriptions)
+  return(result)
 }
 
 #' Retrieve Reactome Pathway Gene Sets
