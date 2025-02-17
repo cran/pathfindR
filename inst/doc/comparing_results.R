@@ -23,16 +23,16 @@ combined_results_graph(
 )
 
 ## ----compare_graph3, eval=FALSE-----------------------------------------------
-#  combined_results_graph(
-#    combined_df,
-#    use_description = TRUE,
-#    selected_terms = combined_df$Term_Description[1:4]
-#  )
+# combined_results_graph(
+#   combined_df,
+#   use_description = TRUE,
+#   selected_terms = combined_df$Term_Description[1:4]
+# )
 
 ## ----compare_graph4, eval=FALSE-----------------------------------------------
-#  combined_results_graph(
-#    combined_df,
-#    selected_terms = c("hsa04144", "hsa04141", "hsa04140"),
-#    node_size = "p_val"
-#  )
+# combined_results_graph(
+#   combined_df,
+#   selected_terms = c("hsa04144", "hsa04141", "hsa04140"),
+#   node_size = "p_val"
+# )
 
