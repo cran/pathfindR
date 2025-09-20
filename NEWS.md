@@ -1,3 +1,9 @@
+# pathfindR 2.6.0
+
+## Minor Changes and Bug Fixes
+- fixed missing argument issue in `get_gene_sets_list`(#230)
+- refactored to introduce `safe_get_content` so that URL access issues are handled more gracefully
+
 # pathfindR 2.5.1
 
 ## Minor Changes and Bug Fixes
