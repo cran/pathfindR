@@ -56,7 +56,8 @@ test_that("`visualize_term_interactions()` -- creates expected list of ggraph ob
 
 test_that("`visualize_KEGG_diagram()` -- creates expected list of ggraph objects", {
     skip_on_cran()
-
+    skip_if_not_installed("org.Hs.eg.db")
+    
     expect_is(res <- visualize_KEGG_diagram(kegg_pw_ids = single_result$ID, input_processed = processed_input), "list")
     expect_is(res[[1]], "ggraph")
 
@@ -68,6 +69,7 @@ test_that("`visualize_KEGG_diagram()` -- creates expected list of ggraph objects
 
 test_that("`visualize_KEGG_diagram()` -- skips pathway if non-existent", {
     skip_on_cran()
+    skip_if_not_installed("org.Hs.eg.db")
     temp_res <- example_pathfindR_output[1:2, ]
     temp_res$ID[2] <- "hsa12345"
 

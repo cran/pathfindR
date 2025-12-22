@@ -1,3 +1,7 @@
+# pathfindR 2.7.0
+## Minor Changes and Bug Fixes
+- Moved org.Hs.eg.db from "Imports" to "Suggests" per new CRAN policy. Relevant functions revert to default behaviour if the required package is not installed.
+
 # pathfindR 2.6.0
 
 ## Minor Changes and Bug Fixes

@@ -258,6 +258,7 @@ visualize_KEGG_diagram <- function(
     legend.position = "top"
 ) {
     message("This function utilises one functionality of `ggkegg`. For more options, visit https://github.com/noriakis/ggkegg")
+    
     ############ Arg checks
 
     ### kegg_pw_ids
@@ -277,6 +278,16 @@ visualize_KEGG_diagram <- function(
     if (!all(nec_cols %in% colnames(input_processed))) {
         stop("`input_processed` should contain the following columns: ", paste(dQuote(nec_cols),
             collapse = ", "))
+    }
+    
+    if (!requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
+      message(
+        "Package 'org.Hs.eg.db' is not installed; returning empty list.\n",
+        "Install it with:\n",
+        "  if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager')\n",
+        "  BiocManager::install('org.Hs.eg.db')"
+      )
+      return(list())
     }
 
     ############ Create change vector Convert gene symbols into NCBI gene IDs
