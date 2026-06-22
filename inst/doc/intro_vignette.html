@@ -12,7 +12,7 @@
 
 <meta name="author" content="Ege Ulgen" />
 
-<meta name="date" content="2025-12-22" />
+<meta name="date" content="2026-06-22" />
 
 <title>Introduction to pathfindR</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Introduction to pathfindR</h1>
 <h4 class="author">Ege Ulgen</h4>
-<h4 class="date">2025-12-22</h4>
+<h4 class="date">2026-06-22</h4>
 
 
 
@@ -469,12 +469,6 @@ below:</p>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>For a detailed step-by-step explanation and an unwrapped
-demonstration of the active-subnetwork-oriented enrichment analysis, see
-the vignette <a href="manual_execution.html">Step-by-Step Execution of
-the pathfindR Enrichment Workflow</a></p>
-</blockquote>
 <p>Executing the workflow is straightforward (but does typically take
 several minutes):</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>output_df <span class="ot">&lt;-</span> <span class="fu">run_pathfindR</span>(example_pathfindR_input)</span></code></pre></div>
@@ -542,7 +536,7 @@ result in significantly longer run time.</p>
 and the custom gene sets (list) and the custom gene set descriptions
 (named vector) should be supplied via the arguments
 <code>custom_genes</code> and <code>custom_descriptions</code>,
-respectively. See <code>?fetch_gene_set</code> for more details and <a href="#analysis-with-custom-gene-sets">Analysis with Custom Gene
+respectively. See <code>?fetch_gene_sets</code> for more details and <a href="#analysis-with-custom-gene-sets">Analysis with Custom Gene
 Sets</a> for a simple demonstration.</p>
 <p>For details on obtaining organism-specific Gene Sets and PIN data,
 see the vignette <a href="obtain_data.html">Obtaining PIN and Gene Sets
@@ -747,15 +741,15 @@ used to generate KEGG pathway diagrams that are returned as a list of
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>  <span class="at">result_df =</span> example_pathfindR_output,</span>
 <span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>  <span class="at">input_processed =</span> input_processed,</span>
 <span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>  <span class="at">is_KEGG_result =</span> <span class="cn">TRUE</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>)  <span class="co"># this function returns a list of ggraph objects (named by Term ID)</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>) <span class="co"># this function returns a list of ggraph objects (named by Term ID)</span></span>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a></span>
 <span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co"># save one of the plots as PDF image</span></span>
 <span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>  <span class="st">&quot;hsa04911_diagram.pdf&quot;</span>,   <span class="co"># path to output, format is determined by extension</span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>  gg_list<span class="sc">$</span>hsa04911,         <span class="co"># what to plot</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">5</span>,                 <span class="co"># adjust width</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span>                <span class="co"># adjust height</span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>) </span></code></pre></div>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>  <span class="st">&quot;hsa04911_diagram.pdf&quot;</span>,</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>  gg_list<span class="sc">$</span>hsa04911,</span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>)</span></code></pre></div>
 <p>Alternatively (i.e., for other types of non-KEGG enrichment
 analyses), an interaction diagram per enriched term can be generated
 again via <code>visualize_terms()</code>. These diagrams are also
@@ -766,15 +760,15 @@ returned as a list of <code>ggraph</code> objects:</p>
 <span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="at">input_processed =</span> input_processed,</span>
 <span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="at">is_KEGG_result =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  <span class="at">pin_name_path =</span> <span class="st">&quot;Biogrid&quot;</span></span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>)  <span class="co"># this function returns a list of ggraph objects (named by Term ID)</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>) <span class="co"># this function returns a list of ggraph objects (named by Term ID)</span></span>
 <span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a></span>
 <span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co"># save one of the plots as PDF image</span></span>
 <span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggsave</span>(</span>
-<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  <span class="st">&quot;diabetic_cardiomyopathy_interactions.pdf&quot;</span>,   <span class="co"># path to output, format is determined by extension</span></span>
-<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>  gg_list<span class="sc">$</span>hsa04911,                             <span class="co"># what to plot</span></span>
-<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">10</span>,                                    <span class="co"># adjust width</span></span>
-<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">6</span>                                    <span class="co"># adjust height</span></span>
-<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>) </span></code></pre></div>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  <span class="st">&quot;diabetic_cardiomyopathy_interactions.pdf&quot;</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>  gg_list<span class="sc">$</span>hsa04911,</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">10</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">6</span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 </div>
 <div id="clustering-enriched-terms" class="section level1">
@@ -1304,7 +1298,7 @@ sets:</p>
 <span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>  <span class="at">gene_sets =</span> <span class="st">&quot;Custom&quot;</span>,</span>
 <span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>  <span class="at">custom_genes =</span> custom_genes,</span>
 <span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>  <span class="at">custom_descriptions =</span> custom_descriptions,</span>
-<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>  <span class="at">min_gset_size =</span> <span class="dv">1</span>,   <span class="co"># do not limit the gene set size for demo</span></span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>  <span class="at">min_gset_size =</span> <span class="dv">1</span>, <span class="co"># do not limit the gene set size for demo</span></span>
 <span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>  <span class="at">max_gset_size =</span> <span class="cn">Inf</span>, <span class="co"># do not limit the gene set size for demo</span></span>
 <span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a>)</span>
 <span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a></span>

@@ -76,14 +76,14 @@ knitr::kable(head(example_pathfindR_output, 2))
 #   result_df = example_pathfindR_output,
 #   input_processed = input_processed,
 #   is_KEGG_result = TRUE
-# )  # this function returns a list of ggraph objects (named by Term ID)
+# ) # this function returns a list of ggraph objects (named by Term ID)
 # 
 # # save one of the plots as PDF image
 # ggplot2::ggsave(
-#   "hsa04911_diagram.pdf",   # path to output, format is determined by extension
-#   gg_list$hsa04911,         # what to plot
-#   width = 5,                 # adjust width
-#   height = 5                # adjust height
+#   "hsa04911_diagram.pdf",
+#   gg_list$hsa04911,
+#   width = 5,
+#   height = 5
 # )
 
 ## ----nonKEGG_viss-------------------------------------------------------------
@@ -93,14 +93,14 @@ knitr::kable(head(example_pathfindR_output, 2))
 #   input_processed = input_processed,
 #   is_KEGG_result = FALSE,
 #   pin_name_path = "Biogrid"
-# )  # this function returns a list of ggraph objects (named by Term ID)
+# ) # this function returns a list of ggraph objects (named by Term ID)
 # 
 # # save one of the plots as PDF image
 # ggplot2::ggsave(
-#   "diabetic_cardiomyopathy_interactions.pdf",   # path to output, format is determined by extension
-#   gg_list$hsa04911,                             # what to plot
-#   width = 10,                                    # adjust width
-#   height = 6                                    # adjust height
+#   "diabetic_cardiomyopathy_interactions.pdf",
+#   gg_list$hsa04911,
+#   width = 10,
+#   height = 6
 # )
 
 ## ----hierarchical0------------------------------------------------------------
@@ -194,7 +194,7 @@ knitr::kable(head(example_pathfindR_input))
 #   gene_sets = "Custom",
 #   custom_genes = custom_genes,
 #   custom_descriptions = custom_descriptions,
-#   min_gset_size = 1,   # do not limit the gene set size for demo
+#   min_gset_size = 1, # do not limit the gene set size for demo
 #   max_gset_size = Inf, # do not limit the gene set size for demo
 # )
 # 

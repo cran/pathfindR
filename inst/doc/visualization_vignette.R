@@ -27,14 +27,14 @@ enrichment_chart(example_pathfindR_output_clustered, plot_by_cluster = TRUE)
 #   result_df = example_pathfindR_output,
 #   input_processed = input_processed,
 #   is_KEGG_result = TRUE
-# )  # this function returns a list of ggraph objects (named by Term ID)
+# ) # this function returns a list of ggraph objects (named by Term ID)
 # 
 # # save one of the plots as PDF image
 # ggplot2::ggsave(
-#   "hsa04911_diagram.pdf",   # path to output, format is determined by extension
-#   gg_list$hsa04911,         # what to plot
-#   width = 5                 # adjust width
-#   height = 5                # adjust height
+#   "hsa04911_diagram.pdf",
+#   gg_list$hsa04911,
+#   width = 5,
+#   height = 5
 # )
 
 ## ----nonKEGG_viss, eval=FALSE-------------------------------------------------
@@ -44,14 +44,14 @@ enrichment_chart(example_pathfindR_output_clustered, plot_by_cluster = TRUE)
 #   input_processed = input_processed,
 #   is_KEGG_result = FALSE,
 #   pin_name_path = "Biogrid"
-# )  # this function returns a list of ggraph objects (named by Term ID)
+# ) # this function returns a list of ggraph objects (named by Term ID)
 # 
 # # save one of the plots as PDF image
 # ggplot2::ggsave(
-#   "diabetic_cardiomyopathy_interactions.pdf",   # path to output, format is determined by extension
-#   gg_list$hsa04911,                             # what to plot
-#   width = 10                                    # adjust width
-#   height = 6                                    # adjust height
+#   "diabetic_cardiomyopathy_interactions.pdf",
+#   gg_list$hsa04911,
+#   width = 10,
+#   height = 6
 # )
 
 ## ----hmap---------------------------------------------------------------------
@@ -70,16 +70,29 @@ term_gene_heatmap(example_pathfindR_output)
 # term_gene_heatmap(result_df = example_pathfindR_output, genes_df = example_pathfindR_input)
 
 ## ----term_gene1---------------------------------------------------------------
-term_gene_graph(example_pathfindR_output)
+g <- create_term_gene_graph(example_pathfindR_output)
+create_term_gene_plot(g)
 
 ## ----term_gene2, eval=FALSE---------------------------------------------------
-# term_gene_graph(example_pathfindR_output, num_terms = NULL)
+# g <- create_term_gene_graph(example_pathfindR_output, num_terms = NULL)
+# create_term_gene_plot(g)
 
-## ----term_gene3, eval=FALSE---------------------------------------------------
-# term_gene_graph(example_pathfindR_output, num_terms = 3, use_description = TRUE)
+## ----term_gene3---------------------------------------------------------------
+g <- create_term_gene_graph(example_pathfindR_output, num_terms = 3, use_description = TRUE)
+create_term_gene_plot(g)
 
 ## ----term_gene4, eval=FALSE---------------------------------------------------
-# term_gene_graph(example_pathfindR_output, num_terms = 3, node_size = "p_val")
+# create_term_gene_graph(example_pathfindR_output, num_terms = 3, term_size = "p_val")
+
+## ----term_gene5---------------------------------------------------------------
+g <- create_term_gene_graph(
+  result_df = pathfindR.data::example_pathfindR_output,
+  genes_df = pathfindR.data::example_pathfindR_input,
+  term_fill = "Fold_Enrichment",
+  num_terms = 3,
+  use_edge_weights = TRUE
+)
+create_term_gene_plot(g)
 
 ## ----upset1-------------------------------------------------------------------
 UpSet_plot(example_pathfindR_output)

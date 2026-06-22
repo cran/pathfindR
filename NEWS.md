@@ -1,6 +1,25 @@
+# pathfindR 3.0.0
+
+## Major Changes
+- Re-implemented the active subnetwork search (GR/SA/GA) in R and C++ (via
+  Rcpp), removing the Java dependency. For GR and SA, results are numerically
+  identical to the legacy JAR given the same seed and inputs.
+- Renamed the exported function `active_snw_search()` to
+  `get_active_subnetworks()` (its signature has also changed).
+- Renamed the exported function `filterActiveSnws()` to
+  `filter_active_subnetworks()`.
+- Renamed the utility function `fetch_gene_set()` to `fetch_gene_sets()`.
+
+## Minor Changes and Bug Fixes
+- Removed the package start-up message.
+- Split `term_gene_graph()` into `create_term_gene_graph()` and
+  `create_term_gene_plot()`: `create_term_gene_graph()` builds the `igraph`
+  structure, while `create_term_gene_plot()` visualizes the graph from the
+  information available in that `igraph` object.
+
 # pathfindR 2.7.0
 ## Minor Changes and Bug Fixes
-- Moved org.Hs.eg.db from "Imports" to "Suggests" per new CRAN policy. Relevant functions revert to default behaviour if the required package is not installed.
+- Moved org.Hs.eg.db from "Imports" to "Suggests" per new CRAN policy. Relevant functions revert to default behavior if the required package is not installed.
 
 # pathfindR 2.6.0
 

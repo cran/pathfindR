@@ -52,8 +52,6 @@ library(pathfindR)
 knitr::kable(head(example_pathfindR_input))
 ```
 
-> For a detailed step-by-step explanation and an unwrapped demonstration of the active-subnetwork-oriented enrichment analysis, see the vignette [Step-by-Step Execution of the pathfindR Enrichment Workflow](manual_execution.html)
-
 Executing the workflow is straightforward (but does typically take several minutes):
 
 ```{r run_pathfindR}
@@ -111,7 +109,7 @@ output_df <- run_pathfindR(example_pathfindR_input,
 
 > Note that increasing the number of terms for enrichment analysis may result in significantly longer run time.
 
-If the user prefers to use another gene set source, the `gene_sets` argument should be set to `"Custom"` and the custom gene sets (list) and the custom gene set descriptions (named vector) should be supplied via the arguments `custom_genes` and `custom_descriptions`, respectively. See `?fetch_gene_set` for more details and [Analysis with Custom Gene Sets] for a simple demonstration.
+If the user prefers to use another gene set source, the `gene_sets` argument should be set to `"Custom"` and the custom gene sets (list) and the custom gene set descriptions (named vector) should be supplied via the arguments `custom_genes` and `custom_descriptions`, respectively. See `?fetch_gene_sets` for more details and [Analysis with Custom Gene Sets] for a simple demonstration.
 
 For details on obtaining organism-specific Gene Sets and PIN data, see the vignette [Obtaining PIN and Gene Sets Data](obtain_data.html).
 
@@ -235,15 +233,15 @@ gg_list <- visualize_terms(
   result_df = example_pathfindR_output,
   input_processed = input_processed,
   is_KEGG_result = TRUE
-)  # this function returns a list of ggraph objects (named by Term ID)
+) # this function returns a list of ggraph objects (named by Term ID)
 
 # save one of the plots as PDF image
 ggplot2::ggsave(
-  "hsa04911_diagram.pdf",   # path to output, format is determined by extension
-  gg_list$hsa04911,         # what to plot
-  width = 5,                 # adjust width
-  height = 5                # adjust height
-) 
+  "hsa04911_diagram.pdf",
+  gg_list$hsa04911,
+  width = 5,
+  height = 5
+)
 ```
 
 Alternatively (i.e., for other types of non-KEGG enrichment analyses), an interaction diagram per enriched term can be generated again via `visualize_terms()`. These diagrams are also returned as a list of `ggraph` objects:
@@ -255,15 +253,15 @@ gg_list <- visualize_terms(
   input_processed = input_processed,
   is_KEGG_result = FALSE,
   pin_name_path = "Biogrid"
-)  # this function returns a list of ggraph objects (named by Term ID)
+) # this function returns a list of ggraph objects (named by Term ID)
 
 # save one of the plots as PDF image
 ggplot2::ggsave(
-  "diabetic_cardiomyopathy_interactions.pdf",   # path to output, format is determined by extension
-  gg_list$hsa04911,                             # what to plot
-  width = 10,                                    # adjust width
-  height = 6                                    # adjust height
-) 
+  "diabetic_cardiomyopathy_interactions.pdf",
+  gg_list$hsa04911,
+  width = 10,
+  height = 6
+)
 ```
 
 # Clustering Enriched Terms
@@ -410,7 +408,7 @@ example_custom_genesets_result <- run_pathfindR(
   gene_sets = "Custom",
   custom_genes = custom_genes,
   custom_descriptions = custom_descriptions,
-  min_gset_size = 1,   # do not limit the gene set size for demo
+  min_gset_size = 1, # do not limit the gene set size for demo
   max_gset_size = Inf, # do not limit the gene set size for demo
 )
 
